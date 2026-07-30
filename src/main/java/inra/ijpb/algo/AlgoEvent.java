@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -40,6 +40,18 @@ public class AlgoEvent
 	protected double step;
 	protected double total;
 	
+	/**
+	 * Creates a new AlgoEvent.
+	 * 
+	 * @param source
+	 *            the object generating the event
+	 * @param status
+	 *            the status message
+	 * @param step
+	 *            the progression step
+	 * @param total
+	 *            the total amount of progression step
+	 */
 	public AlgoEvent(Object source, String status, double step, double total) 
 	{
 		this.source = source;
@@ -48,6 +60,14 @@ public class AlgoEvent
 		this.total = total;
 	}
 	
+	/**
+	 * Creates a new AlgoEvent.
+	 * 
+	 * @param source
+	 *            the object generating the event
+	 * @param status
+	 *            the status message
+	 */
 	public AlgoEvent(Object source, String status) 
 	{
 		this.source = source;
@@ -56,6 +76,16 @@ public class AlgoEvent
 		this.total = 0;
 	}
 	
+	/**
+	 * Creates a new AlgoEvent.
+	 * 
+	 * @param source
+	 *            the object generating the event
+	 * @param step
+	 *            the progression step
+	 * @param total
+	 *            the total amount of progression step
+	 */
 	public AlgoEvent(Object source, double step, double total) 
 	{
 		this.source = source;

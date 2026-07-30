@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -35,7 +35,7 @@ import inra.ijpb.data.image.Images3D;
  * Computes 3D distance transform in a 5x5x5 neighborhood using four chamfer
  * weights and floating point calculation.
  * 
- * @deprecated replaced by ChamferDistanceTransform3DFloat (since 1.4.4)
+ * @deprecated replaced by ChamferDistanceTransform3DFloat (since 1.5.0)
  *  
  * @author David Legland
  * 
@@ -79,6 +79,7 @@ public class DistanceTransform3D4WeightsFloat extends AlgoStub implements Distan
 	 * Default constructor that specifies the chamfer weights.
 	 * @param weights an array of four weights direction orthogonal, diagonal, cube diagonal, and (+-2,+-1,+-1).
 	 */
+	@Deprecated
 	public DistanceTransform3D4WeightsFloat(ChamferWeights3D weights)
 	{
 		this(weights.getFloatWeights(), true);
@@ -88,6 +89,7 @@ public class DistanceTransform3D4WeightsFloat extends AlgoStub implements Distan
 	 * Default constructor that specifies the chamfer weights.
 	 * @param weights an array of four weights direction orthogonal, diagonal, cube diagonal, and (+-2,+-1,+-1).
 	 */
+	@Deprecated
 	public DistanceTransform3D4WeightsFloat(float[] weights)
 	{
 		this.weights = weights;
@@ -105,6 +107,7 @@ public class DistanceTransform3D4WeightsFloat extends AlgoStub implements Distan
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3D4WeightsFloat(ChamferWeights3D weights, boolean normalize)
 	{
 		this(weights.getFloatWeights(), normalize);
@@ -118,6 +121,7 @@ public class DistanceTransform3D4WeightsFloat extends AlgoStub implements Distan
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3D4WeightsFloat(float[] weights, boolean normalize)
 	{
 		this(weights);
@@ -141,6 +145,7 @@ public class DistanceTransform3D4WeightsFloat extends AlgoStub implements Distan
 	 *         <li>the distance to the nearest background pixel otherwise</li>
 	 *         </ul>
 	 */
+	@Deprecated
 	public ImageStack distanceMap(ImageStack image) 
 	{
 		// size of image

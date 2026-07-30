@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -62,34 +62,27 @@ public class GeodesicDiameterPlugin implements PlugIn
 	@Override
 	public void run(String arg0) 
 	{
+        // create the list of image names
+        String[] imageNames = IJUtils.getOpenImageNames();
+        if (imageNames.length == 0)
+        {
+            IJ.error("No image", "Need at least one image to work");
+            return;
+        }
+
+		// name of current image
+		String currentImageName = IJ.getImage().getTitle();
+		
 		// Open a dialog to choose:
 		// - a label image
 		// - a set of weights
-		int[] indices = WindowManager.getIDList();
-		if (indices==null)
-		{
-			IJ.error("No image", "Need at least one image to work");
-			return;
-		}
-		
-		// create the list of image names
-		String[] imageNames = new String[indices.length];
-		for (int i=0; i<indices.length; i++)
-		{
-			imageNames[i] = WindowManager.getImage(indices[i]).getTitle();
-		}
-		
-		// name of selected image
-		String selectedImageName = IJ.getImage().getTitle();
-		
-		// create the dialog
 		GenericDialog gd = new GenericDialog("Geodesic Diameter");
-		gd.addChoice("Label Image:", imageNames, selectedImageName);
-		// Set Chessknight weights as default
+		gd.addChoice("Label Image:", imageNames, currentImageName);
+		// Set Chess Knight weights as default
 		gd.addChoice("Distances", ChamferMasks2D.getAllLabels(), 
 				ChamferMasks2D.CHESSKNIGHT.toString());
 		gd.addCheckbox("Show Overlay Result", true);
-		gd.addChoice("Image to overlay:", imageNames, selectedImageName);
+		gd.addChoice("Image to overlay:", imageNames, currentImageName);
 		gd.addCheckbox("Export to ROI Manager", true);
 		gd.showDialog();
 		
@@ -170,54 +163,15 @@ public class GeodesicDiameterPlugin implements PlugIn
 	// ====================================================
 	// Computing functions 
 	
-//	/**
-//	 * Display the result of geodesic parameter extraction as overlay on a given
-//	 * image.
-//	 * 
-//	 * @param target
-//	 *            the imagePlus used to display result
-//	 * @param table
-//	 *            the ResultsTable obtained from geodesicDimaeter analysis
-//	 */
-//	public void showResultsAsOverlay(ImagePlus target, ResultsTable table) 
-//	{
-//		
-//		Overlay overlay = new Overlay();
-//		
-//		Roi roi;
-//		
-//		int count = table.getCounter();
-//		for (int i = 0; i < count; i++) {
-//			// Coordinates of inscribed circle
-//			double xi = table.getValue("xi", i);
-//			double yi = table.getValue("yi", i);
-//			double ri = table.getValue("Radius", i);
-//			
-//			// draw inscribed circle
-//			int width = (int) Math.round(2 * ri);
-//			roi = new OvalRoi((int) (xi - ri), (int) (yi - ri), width, width);
-//			roi.setStrokeColor(Color.BLUE);
-//			overlay.add(roi);
-//			
-//			// Display label
-//			roi = new TextRoi((int)xi, (int)yi, Integer.toString(i + 1));
-//			roi.setStrokeColor(Color.BLUE);
-//			overlay.add(roi);
-//			
-//			// Draw geodesic diameter 
-//			int x1 = (int) table.getValue("x1", i);
-//			int y1 = (int) table.getValue("y1", i);
-//			int x2 = (int) table.getValue("x2", i);
-//			int y2 = (int) table.getValue("y2", i);
-//			roi = new Line(x1, y1, x2, y2);
-//			roi.setStrokeColor(Color.RED);
-//			overlay.add(roi);			
-//		}
-//		
-//		target.setOverlay(overlay);
-//	}
-
-	public void drawPaths(ImagePlus target, Map<Integer, GeodesicDiameter.Result> geodDiams)
+	/**
+	 * Displays the geodesic paths onto the given image.
+	 * 
+	 * @param target
+	 *            target image
+	 * @param geodDiams
+	 *            the diameters to draw
+	 */
+	public static final void drawPaths(ImagePlus target, Map<Integer, GeodesicDiameter.Result> geodDiams)
 	{
 		Overlay overlay = new Overlay();
 		Calibration calib = target.getCalibration();
@@ -238,7 +192,7 @@ public class GeodesicDiameterPlugin implements PlugIn
 	 * @param target The ImagePlus that will be associated with ROIS
 	 * @param geodDiams the list of paths
 	 */
-	public void createPathRois(ImagePlus target, Map<Integer, GeodesicDiameter.Result> geodDiams)
+	public static final void createPathRois(ImagePlus target, Map<Integer, GeodesicDiameter.Result> geodDiams)
 	{
 		// get instance of ROI Manager
 		RoiManager manager = RoiManager.getRoiManager();
@@ -252,7 +206,7 @@ public class GeodesicDiameterPlugin implements PlugIn
 		}
 	}
 
-	private Roi createPathRoi(List<Point2D> path, Calibration calib)
+	private static final Roi createPathRoi(List<Point2D> path, Calibration calib)
 	{
 		if (path == null)
     	{
@@ -287,7 +241,7 @@ public class GeodesicDiameterPlugin implements PlugIn
         }
 	}
 	
-	private Point2D calibToPixel(Point2D point, Calibration calib)
+	private static final Point2D calibToPixel(Point2D point, Calibration calib)
 	{
 		double x = (point.getX() - calib.xOrigin) / calib.pixelWidth;
 		double y = (point.getY() - calib.yOrigin) / calib.pixelHeight;

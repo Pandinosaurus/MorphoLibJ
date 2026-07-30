@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,6 +32,7 @@ public class DistanceTransform3DShortTest
 {
 
 	@Test
+	@Deprecated
 	public void testDistanceMap()
 	{
 		// create 3D image containing a cube 
@@ -62,6 +63,7 @@ public class DistanceTransform3DShortTest
 	}
 
 	@Test
+	@Deprecated
 	public void testDistanceMap_FromCenter()
 	{
 		// create 3D image containing a cube 
@@ -105,6 +107,7 @@ public class DistanceTransform3DShortTest
 	 * Test propagation of distance maps within touching labels
 	 */
 	@Test
+	@Deprecated
 	public void testDistanceMap_Labels()
 	{
 		// create 3D image containing eight cubes with labels between 1 and 8 

@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -44,6 +44,7 @@ public class LabelDilation3D4WShort extends AlgoStub
 	// ==================================================
 	// Class variables
 	
+	@Deprecated
 	short[] weights = new short[]{5, 7, 11};
 
 	
@@ -57,6 +58,7 @@ public class LabelDilation3D4WShort extends AlgoStub
 	 * @param weights
 	 *            the Chamfer weights to use.
 	 */
+	@Deprecated
 	public LabelDilation3D4WShort(ChamferWeights3D weights) 
 	{
 		this(weights.getShortWeights());
@@ -69,6 +71,7 @@ public class LabelDilation3D4WShort extends AlgoStub
 	 * @param weights
 	 *            the Chamfer weights to use, as an array of shorts with four elements. 
 	 */
+	@Deprecated
 	public LabelDilation3D4WShort(short[] weights) 
 	{
 		this.weights = weights;
@@ -98,6 +101,7 @@ public class LabelDilation3D4WShort extends AlgoStub
 	 * @return a new label image where each label is dilated over background
 	 *         pixels.
 	 */
+	@Deprecated
 	public ImageStack process(ImageStack labelImage, double distMax)
 	{
 		// use max distance relative to chamfer weights

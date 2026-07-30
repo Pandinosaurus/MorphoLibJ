@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -19,12 +40,15 @@ import inra.ijpb.algo.AlgoListener;
  * The <code>IntrinsicVolumes3D</code> class provides static classes to
  * facilitate usage when no algorithm monitoring is necessary.
  * 
+ * @deprecated renamed into IntrinsicVolumes3D
+ * 
  * @see inra.ijpb.measure.IntrinsicVolumes3D
- * @see inra.ijpb.measure.region2d.IntrinsicVolumesAnalyzer2D
+ * @see inra.ijpb.measure.region2d.IntrinsicVolumes2D
  * 
  * @author dlegland
  *
  */
+@Deprecated
 public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolumesAnalyzer3D.Result>
         implements AlgoListener
 {
@@ -104,26 +128,36 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     // ==================================================
     // Class members
 
+	@Deprecated
     boolean computeVolume = true;
+	@Deprecated
     boolean computeSurfaceArea = true;
+	@Deprecated
     boolean computeMeanBreadth = true;
+	@Deprecated
     boolean computeEulerNumber = true;
     
     /**
      * Number of directions for computing surface area or mean breadth with
      * Crofton Formula. Default is 13.
      */
+	@Deprecated
     int directionNumber = 13;
 
     /**
      * Connectivity for computing 3D Euler number. Default is 6. 
      */
+	@Deprecated
     int connectivity = 6;
    
     
     // ==================================================
     // Constructors
 
+    /**
+     * Default empty constructor.
+     */
+	@Deprecated
     public IntrinsicVolumesAnalyzer3D()
     {
     }
@@ -135,6 +169,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     /**
      * @return the directionNumber used to compute surface area and mean breadth
      */
+	@Deprecated
     public int getDirectionNumber()
     {
         return directionNumber;
@@ -145,6 +180,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
      *            the number of directions used to compute surface area and mean
      *            breadth (either 3 or 13, default is 13)
      */
+	@Deprecated
     public void setDirectionNumber(int directionNumber)
     {
         this.directionNumber = directionNumber;
@@ -153,6 +189,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     /**
      * @return the connectivity used to compute Euler number
      */
+	@Deprecated
     public int getConnectivity()
     {
         return connectivity;
@@ -163,6 +200,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
      *            the connectivity used to compute Euler number (either 6 or 26,
      *            default is 6)
      */
+	@Deprecated
     public void setConnectivity(int connectivity)
     {
         this.connectivity = connectivity;
@@ -173,6 +211,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     // Implementation of RegionAnalyzer3D methods
 
     @Override
+	@Deprecated
     public ResultsTable createTable(Map<Integer, Result> results)
     {
         // Initialize a new result table
@@ -200,6 +239,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     }
 
     @Override
+	@Deprecated
     public Result[] analyzeRegions(ImageStack image, int[] labels, Calibration calib)
     {
         // Histogram of binary configurations for each region label
@@ -268,6 +308,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
      * @see inra.ijpb.algo.AlgoListener#algoProgressChanged(inra.ijpb.algo.AlgoEvent)
      */
     @Override
+	@Deprecated
     public void algoProgressChanged(AlgoEvent evt)
     {
         this.fireProgressChanged(evt);
@@ -277,6 +318,7 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
      * @see inra.ijpb.algo.AlgoListener#algoStatusChanged(inra.ijpb.algo.AlgoEvent)
      */
     @Override
+	@Deprecated
     public void algoStatusChanged(AlgoEvent evt)
     {
         this.fireStatusChanged(evt);
@@ -285,17 +327,46 @@ public class IntrinsicVolumesAnalyzer3D extends RegionAnalyzer3D<IntrinsicVolume
     // ==================================================
     // Inner class for storing results
     
+    /**
+     * Inner class for storing results.
+     */
+	@Deprecated
     public class Result
     {
+    	/** The volume of the region */
+		@Deprecated
         public double volume = Double.NaN;
+    	/** The surface area of the region */
+		@Deprecated
         public double surfaceArea = Double.NaN;
+    	/** The mean breadth of the region (proportional to the integral of average curvature)*/
+		@Deprecated
         public double meanBreadth = Double.NaN;
+    	/** The Euler Number of the region */
+		@Deprecated
         public double eulerNumber = Double.NaN;
         
+        /**
+         * Empty constructor.
+         */
+		@Deprecated
         public Result()
         {
         }
         
+        /**
+		 * Creates a new data class for storing intrinsic volume measurements.
+		 * 
+		 * @param volume
+		 *            the volume of the region.
+		 * @param surf
+		 *            the surface area of the region.
+		 * @param breadth
+		 *            the mean breadth of the region
+		 * @param euler
+		 *            the Euler number of the region
+		 */
+		@Deprecated
         public Result(double volume, double surf, double breadth, double euler)
         {
             this.volume = volume;

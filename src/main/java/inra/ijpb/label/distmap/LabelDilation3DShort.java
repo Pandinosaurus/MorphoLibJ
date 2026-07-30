@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,18 +32,23 @@ import inra.ijpb.binary.distmap.ChamferMask3D.ShortOffset;
  * Apply a dilation by a specified radius to each label of a label map by
  * constraining the dilation. Labels can not dilate over existing labels.
  * 
- * @see inra.ijpb.binary.ChamferMask3D
+ * @deprecated replaced by inra.ijpb.label.filter.ChamferLabelDilation3DShort
+ * 
+ * @see inra.ijpb.binary.ChamferWeights3D
  * @see inra.ijpb.label.distmap.LabelDilation2DShort
  * 
  * @author dlegland
  * 
  */
+@Deprecated
 public class LabelDilation3DShort extends AlgoStub 
 {
 	// ==================================================
 	// Class variables
 	
+	@Deprecated
 	short[] weights = new short[]{5, 7, 11};
+	@Deprecated
 	ChamferMask3D mask;
 	
 	
@@ -57,6 +62,7 @@ public class LabelDilation3DShort extends AlgoStub
 	 * @param mask
 	 *            the Chamfer mask to use.
 	 */
+	@Deprecated
 	public LabelDilation3DShort(ChamferMask3D mask) 
 	{
 		this.mask = mask;
@@ -81,6 +87,7 @@ public class LabelDilation3DShort extends AlgoStub
 	 * @return a new label image where each label is dilated over background
 	 *         pixels.
 	 */
+	@Deprecated
 	public ImageStack process(ImageStack labelImage, double distMax)
 	{
 		// use max distance relative to chamfer weights

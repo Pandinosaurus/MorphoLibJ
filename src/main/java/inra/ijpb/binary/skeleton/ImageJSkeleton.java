@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -7,12 +28,13 @@ import ij.process.ImageProcessor;
 import inra.ijpb.algo.AlgoStub;
 
 /**
- * @author dlegland
- *
- */
-
-/**
- * Adaptation of the skeletonization code from ImageJ.
+ * Apply skeletonization on a binary image or to a label map.
+ * 
+ * Adaptation of the skeletonization code from ImageJ. In the case of a label
+ * map, all regions are skeletonized during the same process.
+ * 
+ * Note: original IJ algo clears pixels on the boundary. This is not the case
+ * here.
  * 
  * @author dlegland
  *
@@ -28,7 +50,7 @@ public class ImageJSkeleton extends AlgoStub
      * 2 -> delete in second pass 
      * 3 -> delete in either pass
      */
-    private static int[] table1  =             
+    private static int[] table1  =
         {
                 // 0->3  4        8        12       16       20       24       28
                 0,0,0,0, 0,0,1,3, 0,0,3,1, 1,0,1,3, 0,0,0,0, 0,0,0,0, 0,0,2,0, 3,0,3,3,
@@ -63,30 +85,40 @@ public class ImageJSkeleton extends AlgoStub
     public ImageJSkeleton()
     {
     }
-
+    
+    /**
+	 * Computes the skeleton of the region within the binary image and returns
+	 * the result in a new ImageProcessor.
+	 * 
+	 * @param image
+	 *            the binary image to process
+	 * @return the result of skeleton computation
+	 */
     public ImageProcessor process(ImageProcessor image)
     {
-       
+        // create result image
         ImageProcessor result = image.duplicate();
         
-        // note: original IJ algo clears pixels on the boundary
-        
+        // iterate thinning steps to remove border pixels
         int removedPixels;
+        int step = 0;
         do
         {
+            this.fireStatusChanged(this, "Skeletonization - Thinning Step " + step++);
             removedPixels = thin(result, 1, table1);
             removedPixels += thin(result, 2, table1);
         } while (removedPixels > 0);
         
         // use a second table to remove "stuck" pixels
+        step = 0;
         do
         {
+            this.fireStatusChanged(this, "Skeletonization - Cleaning Step " + step++);
             removedPixels = thin(result, 1, table2);
             removedPixels += thin(result, 2, table2);
         } while (removedPixels > 0);
 
         return result;
-        
     }
     
     /**
@@ -114,12 +146,14 @@ public class ImageJSkeleton extends AlgoStub
         // count the number of removed pixels
         int removedPixels = 0;
         
-        // Original IJ algorithm does not process image borders
+        // Iterate over image pixels
+        // Note iterate over *all* pixels, whereas original ImageJ algorithm
+        // does not consider border pixels.
         for (int  y = 0; y < sizeY; y++)
         {
             for (int  x = 0; x < sizeX; x++)
             {
-                // label value of current pixel
+                // retrieve label of current pixel
                 int label = (int) copy.getf(x, y);
                 
                 // do not process background pixels
@@ -128,7 +162,8 @@ public class ImageJSkeleton extends AlgoStub
                     continue;
                 }
 
-                // determine index of current 3-by-3 configuration
+                // determine index of current 3-by-3 configuration, by
+                // considering only pixels with same label
                 int index = 0;
                 // Process neighbor pixels on previous line
                 if (y > 0)
@@ -166,6 +201,7 @@ public class ImageJSkeleton extends AlgoStub
                     }
                 }
                 
+                // determine if current pixel must be set to background
                 int code = table[index];
                 if ((code & pass) > 0)
                 {

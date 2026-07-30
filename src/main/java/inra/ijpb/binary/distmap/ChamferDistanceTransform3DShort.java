@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -40,11 +61,28 @@ public class ChamferDistanceTransform3DShort extends AlgoStub implements Chamfer
 	// ==================================================
 	// Constructors 
 	
+	/**
+	 * Creates a new algorithm for computing 3D distance maps based on a chamfer
+	 * mask.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 */
 	public ChamferDistanceTransform3DShort(ChamferMask3D mask)
 	{
 		this.mask = mask;
 	}
 	
+	/**
+	 * Creates a new algorithm for computing 3D distance maps based on a chamfer
+	 * mask.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 * @param normalize
+	 *            whether distance map should be normalized by the weight
+	 *            associated to orthogonal shifts
+	 */
 	public ChamferDistanceTransform3DShort(ChamferMask3D mask, boolean normalize)
 	{
 		this.mask = mask;
@@ -106,7 +144,6 @@ public class ChamferDistanceTransform3DShort extends AlgoStub implements Chamfer
 				
 		fireStatusChanged(this, "");
 		return buffer;
-
 	}
 	
 	// ==================================================

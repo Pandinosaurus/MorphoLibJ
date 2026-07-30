@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -35,6 +35,14 @@ public class ConstantBorder implements BorderManager
 	ImageProcessor image;
 	float value;
 
+	/**
+	 * Creates a new Constant Border Manager
+	 * 
+	 * @param image
+	 *            the image to expand
+	 * @param value
+	 *            the value used to expand the borders.
+	 */
 	public ConstantBorder(ImageProcessor image, float value)
 	{
 		this.image = image;

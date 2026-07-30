@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -79,7 +79,9 @@ DialogListener
 	 * A pre-defined set of operations for geodesic reconstruction.
 	 */
 	enum Operation {
+		/** reconstruction by dilation */
 		BY_DILATION("By Dilation"),
+		/** reconstruction by erosion */
 		BY_EROSION("By Erosion");
 
 		private final String label;
@@ -106,6 +108,11 @@ DialogListener
 			return this.label;
 		}
 
+		/**
+		 * Returns all the labels for this enumeration.
+		 * 
+		 * @return all the labels for this enumeration.
+		 */
 		public static String[] getAllLabels(){
 			int n = Operation.values().length;
 			String[] result = new String[n];

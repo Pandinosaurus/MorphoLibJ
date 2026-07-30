@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -51,52 +51,45 @@ import java.util.ArrayList;
 public class FloodFill
 {
 	/**
-	 * Private constructor to prevent class instantiation.
-	 */
-	private FloodFill()
-	{
-	}
-
-	/**
-	 * Replaces all the neighbor pixels of (x,y) that have the same values by
-	 * the specified integer value, using the 4-connectivity.
-	 * 
-	 * @param image
-	 *            the image in which floodfill will be propagated
-	 * @param x
-	 *            the x-coordinate of the seed pixel
-	 * @param y
-	 *            the y-coordinate of the seed pixel
-	 * @param value
-	 *            the new value of the connected component at (x,y)
-	 * @param conn
-	 *            the connectivity to use, either 4 or 8
-	 */
-	public final static void floodFill(ImageProcessor image, int x, int y,
+     * Replaces all the neighbor pixels of (x0,y0) that have the same values by
+     * the specified integer value, using the specified connectivity.
+     * 
+     * @param image
+     *            the image in which floodfill will be propagated
+     * @param x0
+     *            the x-coordinate of the seed pixel
+     * @param y0
+     *            the y-coordinate of the seed pixel
+     * @param value
+     *            the new value of the connected component at (x,y)
+     * @param conn
+     *            the connectivity to use, either 4 or 8
+     */
+	public final static void floodFill(ImageProcessor image, int x0, int y0,
 			int value, int conn)
 	{
 		if (conn == 4)
-			floodFillC4(image, x, y, value);
+			floodFillC4(image, x0, y0, value);
 		else if (conn == 8)
-			floodFillC8(image, x, y, value);
+			floodFillC8(image, x0, y0, value);
 		else
 			throw new IllegalArgumentException("Connectivity must be either 4 or 8, not " + conn);
 	}
 	
-	/**
-	 * Replaces all the neighbor pixels of (x,y) that have the same values by
-	 * the specified floating-point value, using the 4-connectivity.
-	 * 
-	 * @param image
-	 *            the image in which floodfill will be propagated
-	 * @param x
-	 *            the x-coordinate of the seed pixel
-	 * @param y
-	 *            the y-coordinate of the seed pixel
-	 * @param value
-	 *            the new value of the connected component at (x,y)
-	 */
-	private final static void floodFillC4(ImageProcessor image, int x, int y,
+    /**
+     * Replaces all the pixels connected to (x0,y0) that have the same values by
+     * the specified floating-point value, using the 4-connectivity.
+     * 
+     * @param image
+     *            the image in which floodfill will be propagated
+     * @param x0
+     *            the x-coordinate of the seed pixel
+     * @param y0
+     *            the y-coordinate of the seed pixel
+     * @param value
+     *            the new value of the connected component at (x,y)
+     */
+	private final static void floodFillC4(ImageProcessor image, int x0, int y0,
 			int value)
 	{
 		// get image size
@@ -104,7 +97,7 @@ public class FloodFill
 		int height = image.getHeight();
 		
 		// get old value
-		int oldValue = image.getPixel(x, y);
+		int oldValue = image.getPixel(x0, y0);
 		
 		// test if already the right value 
 		if (oldValue == value) 
@@ -112,47 +105,48 @@ public class FloodFill
 		
 		// initialize the stack with original pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-		
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 		
 		// process all items in stack
 		while (!stack.isEmpty())
 		{
 			// Extract current position
 			Point p = stack.remove(stack.size()-1);
-			x = p.x;
-			y = p.y;
+			x0 = p.x;
+			y0 = p.y;
 			
 			// process only pixel with the same value
-			if (image.get(x, y) != oldValue) 
+			if (image.get(x0, y0) != oldValue) 
 				continue;
 			
 			// x extremities of scan-line
-			int x1 = x; 
-			int x2 = x;
+			int x1 = x0; 
+			int x2 = x0;
 			
 			// find start of scan-line
-			while (x1 > 0 && image.getPixel(x1-1, y) == oldValue)
+			while (x1 > 0 && image.getPixel(x1-1, y0) == oldValue)
 				x1--;
 			
 			// find end of scan-line
-			while (x2 < width - 1 && image.getPixel(x2+1, y) == oldValue)
+			while (x2 < width - 1 && image.getPixel(x2+1, y0) == oldValue)
 				x2++;
 			
 			// fill current scan-line
-			fillLine(image, y, x1, x2, value);
+            for (int x = x1; x <= x2; x++)
+            {
+                image.set(x, y0, value);
+            }
 
 			// find scan-lines above the current one
-			if (y > 0)
+			if (y0 > 0)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = x1; i <= x2; i++)
 				{
-					int val = image.get(i, y - 1);
+					int val = image.get(i, y0 - 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, y0 - 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -163,15 +157,15 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (y0 < height - 1)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = x1; i <= x2; i++)
 				{
-					int val = image.getPixel(i, y + 1);
+					int val = image.getPixel(i, y0 + 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, y0 + 1));
 						inScanLine = true;
 					}
 					else if (inScanLine && val != oldValue)
@@ -184,19 +178,19 @@ public class FloodFill
 	}
 
 	/**
-	 * Replaces all the pixels in the 8-neighborhood of (x,y) that have the same
-	 * values by the specified value.
-	 * 
+     * Replaces all the pixels connected to (x0,y0) that have the same values by
+     * the specified floating-point value, using the 8-connectivity.
+     * 
 	 * @param image
 	 *            the image in which floodfill will be propagated
-	 * @param x
+	 * @param x0
 	 *            the x-coordinate of the seed pixel
-	 * @param y
+	 * @param y0
 	 *            the y-coordinate of the seed pixel
 	 * @param value
 	 *            the new value of the connected component at (x,y)
 	 */
-	private final static void floodFillC8(ImageProcessor image, int x, int y,
+	private final static void floodFillC8(ImageProcessor image, int x0, int y0,
 			int value)
 	{
 		// get image size
@@ -204,7 +198,7 @@ public class FloodFill
 		int height = image.getHeight();
 
 		// get old value
-		int oldValue = image.getPixel(x, y);
+		int oldValue = image.getPixel(x0, y0);
 
 		// test if already the right value
 		if (oldValue == value)
@@ -212,47 +206,48 @@ public class FloodFill
 
 		// initialize the stack with original pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 
 		// process all items in stack
 		while (!stack.isEmpty())
 		{
 			// Extract current position
 			Point p = stack.remove(stack.size() - 1);
-			x = p.x;
-			y = p.y;
+			x0 = p.x;
+			y0 = p.y;
 
 			// process only pixel with the same value
-			if (image.get(x, y) != oldValue)
+			if (image.get(x0, y0) != oldValue)
 				continue;
 
 			// x extremities of scan-line
-			int x1 = x;
-			int x2 = x;
+			int x1 = x0;
+			int x2 = x0;
 
 			// find start of scan-line
-			while (x1 > 0 && image.getPixel(x1 - 1, y) == oldValue)
+			while (x1 > 0 && image.getPixel(x1 - 1, y0) == oldValue)
 				x1--;
 
 			// find end of scan-line
-			while (x2 < width - 1 && image.getPixel(x2 + 1, y) == oldValue)
+			while (x2 < width - 1 && image.getPixel(x2 + 1, y0) == oldValue)
 				x2++;
 
 			// fill current scan-line
-			fillLine(image, y, x1, x2, value);
+			for (int x = x1; x <= x2; x++)
+            {
+                image.set(x, y0, value);
+            }
 
 			// find scan-lines above the current one
-			if (y > 0)
+			if (y0 > 0)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = Math.max(x1 - 1, 0); i <= Math.min(x2 + 1, width - 1); i++)
 				{
-					int val = image.get(i, y - 1);
+					int val = image.get(i, y0 - 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, y0 - 1));
 						inScanLine = true;
 					} else if (inScanLine && val != oldValue)
 						inScanLine = false;
@@ -260,15 +255,15 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (y0 < height - 1)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = Math.max(x1 - 1, 0); i <= Math.min(x2 + 1, width - 1); i++)
 				{
-					int val = image.getPixel(i, y + 1);
+					int val = image.getPixel(i, y0 + 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, y0 + 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -282,26 +277,26 @@ public class FloodFill
 
 	/**
 	 * Replaces all the neighbor pixels of (x,y) that have the same values by
-	 * the specified integer value, using the 4-connectivity.
+	 * the specified integer value, using the specified connectivity.
 	 * 
 	 * @param image
 	 *            the image in which floodfill will be propagated
-	 * @param x
+	 * @param x0
 	 *            the x-coordinate of the seed pixel
-	 * @param y
+	 * @param y0
 	 *            the y-coordinate of the seed pixel
 	 * @param value
 	 *            the new value of the connected component at (x,y)
 	 * @param conn
 	 *            the connectivity to use, either 4 or 8
 	 */
-	public final static void floodFill(ImageProcessor image, int x, int y,
+	public final static void floodFill(ImageProcessor image, int x0, int y0,
 			float value, int conn)
 	{
 		if (conn == 4)
-			floodFillC4(image, x, y, value);
+			floodFillC4(image, x0, y0, value);
 		else if (conn == 8)
-			floodFillC8(image, x, y, value);
+			floodFillC8(image, x0, y0, value);
 		else
 			throw new IllegalArgumentException("Connectivity must be either 4 or 8, not " + conn);
 	}
@@ -313,14 +308,14 @@ public class FloodFill
 	 * 
 	 * @param image
 	 *            the image in which floodfill will be propagated
-	 * @param x
+	 * @param x0
 	 *            the x-coordinate of the seed pixel
-	 * @param y
+	 * @param y0
 	 *            the y-coordinate of the seed pixel
 	 * @param value
 	 *            the new value of the connected component at (x,y)
 	 */
-	private final static void floodFillC4(ImageProcessor image, int x, int y,
+	private final static void floodFillC4(ImageProcessor image, int x0, int y0,
 			float value)
 	{
 		// get image size
@@ -328,7 +323,7 @@ public class FloodFill
 		int height = image.getHeight();
 		
 		// get old value
-		float oldValue = image.getf(x, y);
+		float oldValue = image.getf(x0, y0);
 		
 		// test if already the right value 
 		if (oldValue == value) 
@@ -336,47 +331,48 @@ public class FloodFill
 		
 		// initialize the stack with original pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-		
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 		
 		// process all items in stack
 		while (!stack.isEmpty())
 		{
 			// Extract current position
 			Point p = stack.remove(stack.size() - 1);
-			x = p.x;
-			y = p.y;
+			x0 = p.x;
+			y0 = p.y;
 
 			// process only pixel of the same value
-			if (image.getf(x, y) != oldValue)
+			if (image.getf(x0, y0) != oldValue)
 				continue;
 
 			// x extremities of scan-line
-			int x1 = x;
-			int x2 = x;
+			int x1 = x0;
+			int x2 = x0;
 
 			// find start of scan-line
-			while (x1 > 0 && image.getf(x1 - 1, y) == oldValue)
+			while (x1 > 0 && image.getf(x1 - 1, y0) == oldValue)
 				x1--;
 
 			// find end of scan-line
-			while (x2 < width - 1 && image.getf(x2 + 1, y) == oldValue)
+			while (x2 < width - 1 && image.getf(x2 + 1, y0) == oldValue)
 				x2++;
 
 			// fill current scan-line
-			fillLine(image, y, x1, x2, value);
+            for (int x = x1; x <= x2; x++)
+            {
+                image.setf(x, y0, value);
+            }
 
 			// find scan-lines above the current one
-			if (y > 0)
+			if (y0 > 0)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = x1; i <= x2; i++)
 				{
-					float val = image.getf(i, y - 1);
+					float val = image.getf(i, y0 - 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, y0 - 1));
 						inScanLine = true;
 					}
 					else if (inScanLine && val != oldValue)
@@ -387,15 +383,15 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (y0 < height - 1)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = x1; i <= x2; i++)
 				{
-					float val = image.getf(i, y + 1);
+					float val = image.getf(i, y0 + 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, y0 + 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -409,20 +405,20 @@ public class FloodFill
 
 
 	/**
-	 * Replaces all the pixels in the 8-neighborhood of (x,y) that have the same
-	 * values as the pixel in (x,y) by the specified value. Should work for all
+	 * Replaces all the pixels in the 8-neighborhood of (x0,y0) that have the same
+	 * values as the pixel in (x0,y0) by the specified value. Should work for all
 	 * integer based images: ByteProcessor, ShortProcessor and ColorProcessor.
 	 * 
 	 * @param image
 	 *            the image in which floodfill will be propagated
-	 * @param x
+	 * @param x0
 	 *            the x-coordinate of the seed pixel
-	 * @param y
+	 * @param y0
 	 *            the y-coordinate of the seed pixel
 	 * @param value
 	 *            the new value of the connected component at (x,y)
 	 */
-	private final static void floodFillC8(ImageProcessor image, int x, int y,
+	private final static void floodFillC8(ImageProcessor image, int x0, int y0,
 			float value)
 	{
 		// get image size
@@ -430,7 +426,7 @@ public class FloodFill
 		int height = image.getHeight();
 
 		// get old value
-		float oldValue = image.getf(x, y);
+		float oldValue = image.getf(x0, y0);
 
 		// test if already the right value
 		if (oldValue == value)
@@ -438,47 +434,48 @@ public class FloodFill
 
 		// initialize the stack with original pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 
 		// process all items in stack
 		while (!stack.isEmpty())
 		{
 			// Extract current position
 			Point p = stack.remove(stack.size() - 1);
-			x = p.x;
-			y = p.y;
+			x0 = p.x;
+			y0 = p.y;
 
 			// process only pixel with the same value
-			if (image.getf(x, y) != oldValue)
+			if (image.getf(x0, y0) != oldValue)
 				continue;
 
 			// x extremities of scan-line
-			int x1 = x;
-			int x2 = x;
+			int x1 = x0;
+			int x2 = x0;
 
 			// find start of scan-line
-			while (x1 > 0 && image.getf(x1 - 1, y) == oldValue)
+			while (x1 > 0 && image.getf(x1 - 1, y0) == oldValue)
 				x1--;
 
 			// find end of scan-line
-			while (x2 < width - 1 && image.getf(x2 + 1, y) == oldValue)
+			while (x2 < width - 1 && image.getf(x2 + 1, y0) == oldValue)
 				x2++;
 
 			// fill current scan-line
-			fillLine(image, y, x1, x2, value);
+			for (int x = x1; x <= x2; x++)
+            {
+                image.setf(x, y0, value);
+            }
 
 			// find scan-lines above the current one
-			if (y > 0)
+			if (y0 > 0)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = Math.max(x1 - 1, 0); i <= Math.min(x2 + 1, width - 1); i++)
 				{
-					float val = image.getf(i, y - 1);
+					float val = image.getf(i, y0 - 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, y0 - 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -489,15 +486,15 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (y0 < height - 1)
 			{
-				inScanLine = false;
+			    boolean inScanLine = false;
 				for (int i = Math.max(x1 - 1, 0); i <= Math.min(x2 + 1, width - 1); i++)
 				{
-					float val = image.getf(i, y + 1);
+					float val = image.getf(i, y0 + 1);
 					if (!inScanLine && val == oldValue)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, y0 + 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -510,88 +507,82 @@ public class FloodFill
 	}
 
 	/**
-	 * Assigns in <code>labelImage</code> all the neighbor pixels of (x,y) that
-	 * have the same pixel value in <code>image</code>, the specified new label
-	 * value (<code>value</code>), using the specified connectivity.
-	 * 
-	 * @param inputImage
-	 *            original image to read the pixel values from
-	 * @param x
-	 *            x- coordinate of the seed pixel
-	 * @param y
-	 *            y- coordinate of the seed pixel
-	 * @param outputImage
-	 *            the label image to fill in
-	 * @param value
-	 *            filling value
-	 * @param conn
-	 *            connectivity to use (4 or 8)
-	 */
-	public final static void floodFill(ImageProcessor inputImage, int x,
-			int y, ImageProcessor outputImage, int value, int conn)
+     * Assigns in <code>outputImage</code> all the pixels connected to (x0,y0)
+     * that have the same pixel value in <code>image</code>, the specified new
+     * value (<code>value</code>), using the specified connectivity.
+     * 
+     * @param inputImage
+     *            original image to read the pixel values from
+     * @param x0
+     *            the x-coordinate of the seed pixel
+     * @param y0
+     *            the y-coordinate of the seed pixel
+     * @param outputImage
+     *            the label image to fill in
+     * @param value
+     *            filling value
+     * @param conn
+     *            connectivity to use (4 or 8)
+     */
+	public final static void floodFill(ImageProcessor inputImage, int x0,
+			int y0, ImageProcessor outputImage, int value, int conn)
 	{
-
 		// the shifts to look for new markers to start lines
-		int dx1 = 0;
-		int dx2 = 0;
-		if (conn == 8)
-		{
-			dx1 = -1;
-			dx2 = +1;
-		}
+        final int dx1 = conn == 4 ? 0 : -1;
+        final int dx2 = conn == 4 ? 0 : +1;
 		
 		// get image size
-		int width = inputImage.getWidth();
-		int height = inputImage.getHeight();
+		int sizeX = inputImage.getWidth();
+		int sizeY = inputImage.getHeight();
 		
 		// get old value
-		int oldValue = inputImage.getPixel(x, y);
+		int oldValue = inputImage.getPixel(x0, y0);
 				
-		// initialize the stack with original pixel
+		// initialize the stack with seed pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-		
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 		
 		// process all items in stack
 		while (!stack.isEmpty()) 
 		{
-			// Extract current position
+			// retrieve coordinates of current marker pixel
 			Point p = stack.remove(stack.size()-1);
-			x = p.x;
-			y = p.y;
+			int px = p.x;
+			int py = p.y;
 			
 			// process only pixel of the same value
-			if (inputImage.get(x, y) != oldValue) 
+			if (inputImage.get(px, py) != oldValue) 
 				continue;
 			
 			// x extremities of scan-line
-			int x1 = x; 
-			int x2 = x;
+			int x1 = px; 
+			int x2 = px;
 			
 			// find start of scan-line
-			while (x1 > 0 && inputImage.get(x1-1, y) == oldValue)
+			while (x1 > 0 && inputImage.get(x1-1, py) == oldValue)
 				x1--;
 			
 			// find end of scan-line
-			while (x2 < width - 1 && inputImage.get(x2+1, y) == oldValue)
+			while (x2 < sizeX - 1 && inputImage.get(x2+1, py) == oldValue)
 				x2++;
 			
 			// fill current scan-line
-			fillLine(outputImage, y, x1, x2, value);
-			
+			for (int x = x1; x <= x2; x++)
+			{
+			    outputImage.set(x, py, value);
+			}
 			
 			// find scan-lines above the current one
-			if (y > 0)
+			if (py > 0)
 			{
-				inScanLine = false;
-				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, width - 1); i++)
+			    boolean inScanLine = false;
+				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, sizeX - 1); i++)
 				{
-					int val = inputImage.get(i, y - 1);
-					int lab = (int) outputImage.get(i, y - 1);
+					int val = inputImage.get(i, py - 1);
+					int lab = (int) outputImage.get(i, py - 1);
 					if (!inScanLine && val == oldValue && lab != value)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, py - 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -602,16 +593,16 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (py < sizeY - 1)
 			{
-				inScanLine = false;
-				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, width - 1); i++)
+			    boolean inScanLine = false;
+				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, sizeX - 1); i++)
 				{
-					int val = inputImage.getPixel(i, y + 1);
-					int lab = (int) outputImage.get(i, y + 1);
+					int val = inputImage.getPixel(i, py + 1);
+					int lab = (int) outputImage.get(i, py + 1);
 					if (!inScanLine && val == oldValue && lab != value)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, py + 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -624,16 +615,16 @@ public class FloodFill
 	}
 
 	/**
-	 * Assigns in <code>labelImage</code> all the neighbor pixels of (x,y) that
+	 * Assigns in <code>labelImage</code> all the neighbor pixels of (x0,y0) that
 	 * have the same pixel value in <code>image</code>, the specified new label
 	 * value (<code>value</code>), using the specified connectivity.
 	 * 
 	 * @param inputImage
 	 *            original image to read the pixel values from
-	 * @param x
-	 *            x- coordinate of the seed pixel
-	 * @param y
-	 *            y- coordinate of the seed pixel
+     * @param x0
+     *            the x-coordinate of the seed pixel
+     * @param y0
+     *            the y-coordinate of the seed pixel
 	 * @param outputImage
 	 *            the label image to fill in
 	 * @param value
@@ -641,70 +632,65 @@ public class FloodFill
 	 * @param conn
 	 *            connectivity to use (4 or 8)
 	 */
-	public final static void floodFillFloat(ImageProcessor inputImage, int x,
-			int y, ImageProcessor outputImage, float value, int conn)
+	public final static void floodFillFloat(ImageProcessor inputImage, int x0,
+			int y0, ImageProcessor outputImage, float value, int conn)
 	{
-		// the shifts to look for new markers to start lines
-		int dx1 = 0;
-		int dx2 = 0;
-		if (conn == 8) 
-		{
-			dx1 = -1;
-			dx2 = +1;
-		}
+        // the shifts to look for new markers to start lines
+        final int dx1 = conn == 4 ? 0 : -1;
+        final int dx2 = conn == 4 ? 0 : +1;
 		
 		// get image size
-		int width = inputImage.getWidth();
-		int height = inputImage.getHeight();
+		int sizeX = inputImage.getWidth();
+		int sizeY = inputImage.getHeight();
 		
 		// get old value
-		float oldValue = inputImage.getf(x, y);
+		float oldValue = inputImage.getf(x0, y0);
 		
-		// initialize the stack with original pixel
+		// initialize the stack with seed pixel
 		ArrayList<Point> stack = new ArrayList<Point>();
-		stack.add(new Point(x, y));
-		
-		
-		boolean inScanLine;
+		stack.add(new Point(x0, y0));
 		
 		// process all items in stack
 		while (!stack.isEmpty()) 
 		{
-			// Extract current position
+            // retrieve coordinates of current marker pixel
 			Point p = stack.remove(stack.size()-1);
-			x = p.x;
-			y = p.y;
+			int px = p.x;
+			int py = p.y;
 			
 			// process only pixel of the same value
-			if (inputImage.getf(x, y) != oldValue) 
+			if (inputImage.getf(px, py) != oldValue) 
 				continue;
 			
 			// x extremities of scan-line
-			int x1 = x; 
-			int x2 = x;
+			int x1 = px; 
+			int x2 = px;
 			
 			// find start of scan-line
-			while (x1 > 0 && inputImage.getf(x1-1, y) == oldValue)
+			while (x1 > 0 && inputImage.getf(x1-1, py) == oldValue)
 				x1--;
 			
 			// find end of scan-line
-			while (x2 < width - 1 && inputImage.getf(x2+1, y) == oldValue)
+			while (x2 < sizeX - 1 && inputImage.getf(x2+1, py) == oldValue)
 				x2++;
 			
 			// fill current scan-line
-			fillLine(outputImage, y, x1, x2, value);
-			
-			// find scan-lines above the current one
-			if (y > 0)
+			for (int x = x1; x <= x2; x++)
 			{
-				inScanLine = false;
-				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, width - 1); i++)
+			    outputImage.setf(x, py, value);
+			}
+		     
+			// find scan-lines above the current one
+			if (py > 0)
+			{
+				boolean inScanLine = false;
+				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, sizeX - 1); i++)
 				{
-					float val = inputImage.getf(i, y - 1);
-					float lab = outputImage.getf(i, y - 1);
+					float val = inputImage.getf(i, py - 1);
+					float lab = outputImage.getf(i, py - 1);
 					if (!inScanLine && val == oldValue && lab != value)
 					{
-						stack.add(new Point(i, y - 1));
+						stack.add(new Point(i, py - 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -715,16 +701,16 @@ public class FloodFill
 			}
 
 			// find scan-lines below the current one
-			if (y < height - 1)
+			if (py < sizeY - 1)
 			{
-				inScanLine = false;
-				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, width - 1); i++)
+				boolean inScanLine = false;
+				for (int i = max(x1 + dx1, 0); i <= min(x2 + dx2, sizeX - 1); i++)
 				{
-					float val = inputImage.getf(i, y + 1);
-					float lab = outputImage.getf(i, y + 1);
+					float val = inputImage.getf(i, py + 1);
+					float lab = outputImage.getf(i, py + 1);
 					if (!inScanLine && val == oldValue && lab != value)
 					{
-						stack.add(new Point(i, y + 1));
+						stack.add(new Point(i, py + 1));
 						inScanLine = true;
 					} 
 					else if (inScanLine && val != oldValue)
@@ -734,48 +720,6 @@ public class FloodFill
 				}
 			}
 		}
-	}
-
-	/**
-	 * In the input image, replaces all pixels in row <code>y</code> located
-	 * between <code>x1</code> and <code>x2</code> (inclusive) by the given
-	 * value.
-	 * 
-	 * @param ip
-	 *            the input image to modify
-	 * @param y
-	 *            the index of the row to modify
-	 * @param x1
-	 *            the column index of the first pixel to modify
-	 * @param x2
-	 *            the column index of the first pixel to modify
-	 * @param value
-	 *            the new value of the pixels
-	 */
-	private final static void fillLine(ImageProcessor ip, int y, int x1,
-			int x2, int value)
-	{
-		if (x1 > x2)
-		{
-			int t = x1;
-			x1 = x2;
-			x2 = t;
-		}
-		
-		for (int x = x1; x <= x2; x++)
-			ip.set(x, y, value);
-	}
-
-	/**
-	 * Fill in the horizontal line define by y-coordinate and the two x 
-	 * coordinate extremities (inclusive), with the specified integer value.
-	 * the value x1 must be lower than or equal the value x2. 
-	 */
-	private final static void fillLine(ImageProcessor ip, int y, int x1,
-			int x2, float value)
-	{
-		for (int x = x1; x <= x2; x++)
-			ip.setf(x, y, value);
 	}
 
 	/**
@@ -889,4 +833,11 @@ public class FloodFill
 	{
 		FloodFill3D.floodFillFloat(inputImage, x, y, z, outputImage, value, conn);
 	}
+
+    /**
+     * Private constructor to prevent class instantiation.
+     */
+    private FloodFill()
+    {
+    }
 }

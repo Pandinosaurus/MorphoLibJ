@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -36,6 +36,7 @@ import inra.ijpb.binary.distmap.ChamferMasks3D;
 import inra.ijpb.binary.geodesic.GeodesicDistanceTransform3D;
 import inra.ijpb.binary.geodesic.GeodesicDistanceTransform3DFloat;
 import inra.ijpb.color.ColorMaps;
+import inra.ijpb.data.image.ImageUtils;
 import inra.ijpb.data.image.Images3D;
 
 /**
@@ -237,6 +238,21 @@ public class GeodesicDistanceMap3DPlugin implements PlugIn
 		return resultPlus;
 	}
 
+	/**
+	 * Computes the distance within the mask, starting from the marker image.
+	 * 
+	 * @param marker
+	 *            the binary marker image from which distances will be
+	 *            propagated
+	 * @param mask
+	 *            the binary mask image that will constrain the propagation
+	 * @param weights
+	 *            the set of chamfer weights for computing distances
+	 * @param normalize
+	 *            specifies whether the resulting distance map should be
+	 *            normalized
+	 * @return the geodesic distance map
+	 */
 	@Deprecated
 	public ImageStack process(ImageStack marker, ImageStack mask,
 			float[] weights, boolean normalize)
@@ -266,11 +282,27 @@ public class GeodesicDistanceMap3DPlugin implements PlugIn
 		return result;
 	}
 	
+	/**
+	 * Computes the distance within the mask, starting from the marker image.
+	 * 
+	 * @param marker
+	 *            the binary marker image from which distances will be
+	 *            propagated
+	 * @param mask
+	 *            the binary mask image that will constrain the propagation
+	 * @param chamferMask
+	 *            the chamfer mask used for computing distances
+	 * @param normalize
+	 *            specifies whether the resulting distance map should be
+	 *            normalized
+	 * @return an array of object, containing the name of the new image, and the
+	 *         new ImagePlus instance
+	 */
 	public ImageStack process(ImageStack marker, ImageStack mask,
 			ChamferMask3D chamferMask, boolean normalize)
 	{
 		// check input and mask have the same size
-		if (!Images3D.isSameSize(marker, mask))
+	    if (!ImageUtils.isSameSize(marker, mask))
 		{
 			IJ.showMessage("Error",
 					"Input and marker images\nshould have the same size");

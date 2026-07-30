@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -30,15 +30,21 @@ import inra.ijpb.algo.Algo;
 public interface DistanceTransform3D extends Algo
 {
 	/**
-	 * Computes the distance map from a 3D label image. 
-	 * Distance is computed for each foreground (white) pixel, as the 
-	 * chamfer distance to the nearest background (black) pixel.
-	 * 
-	 * @param image a 3D binary image with white pixels (255) as foreground
-	 * @return a new 3D image containing: <ul>
-	 * <li> 0 for each background pixel </li>
-	 * <li> the distance to the nearest background pixel otherwise</li>
-	 * </ul>
-	 */
+     * Computes the distance map from a 3D label image.
+     * 
+     * Distance is computed for each label voxel (with value greater than 0), as
+     * the chamfer distance to the nearest voxel with a different value. The
+     * other value value can be 0 (the background) or another positive integer
+     * value (corresponding to another region).
+     * 
+     * @param image
+     *            a 3D label map, where integer values correspond to region
+     *            labels, and 0 value to background.
+     * @return a new 3D image containing:
+     *         <ul>
+     *         <li>0 for each background voxel</li>
+     *         <li>the distance to the nearest voxel from another region</li>
+     *         </ul>
+     */
 	public ImageStack distanceMap(ImageStack image);
 }

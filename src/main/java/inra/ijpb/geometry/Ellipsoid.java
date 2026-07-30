@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -40,8 +61,8 @@ public class Ellipsoid
 	 * ImageStack labelImage = ...
 	 * int[] labels = LabelImages.findAllLabels(image);
 	 * Calibation calib = new Calibration();
-	 * Ellipsoid[] ellipsoids = new InertiaEllipsoid().analyzeRegions(labelImage, labels, calib);
-	 * double[][] elongations = GeometricMeasures3D.computeEllipsoidElongations(ellipsoids);
+	 * Ellipsoid[] ellipsoids = new EquivalentEllipsoid().analyzeRegions(labelImage, labels, calib);
+	 * double[][] elongations = Ellipsoid.elongations(ellipsoids);
 	 * </code></pre>
 	 * 
 	 * @param ellipsoids
@@ -210,36 +231,57 @@ public class Ellipsoid
 	// ==================================================
 	// Accesors
 	
+	/**
+	 * @return the center of the ellipsoid
+	 */
 	public Point3D center()
 	{
 		return new Point3D(centerX, centerY, centerZ);
 	}
 	
+	/**
+	 * @return the length of the largest semi-axis
+	 */
 	public double radius1()
 	{
 		return radius1;
 	}
 
+	/**
+	 * @return the length of the second largest semi-axis
+	 */
 	public double radius2()
 	{
 		return radius2;
 	}
 
+	/**
+	 * @return the length of the smallest semi-axis
+	 */
 	public double radius3()
 	{
 		return radius3;
 	}
-
+	
+	/**
+	 * @return the azimut of the main axis, in degrees
+	 */
 	public double phi()
 	{
 		return phi;
 	}
 
+	/**
+	 * @return the elevation of the main axis, in degrees
+	 */
 	public double theta()
 	{
 		return theta;
 	}
 
+	/**
+	 * @return the roll of the ellipsoid around the main axis, in degrees.
+	 */
 	public double psi()
 	{
 		return psi;

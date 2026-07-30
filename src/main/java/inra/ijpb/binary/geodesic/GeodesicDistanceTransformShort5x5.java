@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -37,7 +37,7 @@ import inra.ijpb.binary.ChamferWeights;
  * 
  * @author David Legland
  * 
- * @deprecated replaced by GeodesicDistanceTransformShort (since 1.4.4)
+ * @deprecated replaced by GeodesicDistanceTransformShort (since 1.5.0)
  */
 @Deprecated
 public class GeodesicDistanceTransformShort5x5 extends AlgoStub implements GeodesicDistanceTransform 
@@ -45,42 +45,78 @@ public class GeodesicDistanceTransformShort5x5 extends AlgoStub implements Geode
 	// ==================================================
 	// Class variables
 	
+	/**
+	 * The value used to initialize the distance map.
+	 */
+	@Deprecated
 	public static final short MAX_DIST = Short.MAX_VALUE;
 	
+	@Deprecated
 	short[] weights = new short[]{5, 7, 11};
 
 	/**
 	 * Flag for dividing final distance map by the value first weight. 
 	 * This results in distance map values closer to Euclidean distance. 
 	 */
+	@Deprecated
 	boolean normalizeMap = true;
 
+	@Deprecated
 	int sizeX;
+	@Deprecated
 	int sizeY;
 
 	/** The label image used as mask */
+	@Deprecated
 	ImageProcessor labelImage;
 	
 	/** the instance of ImageProcessor storing the result */
+	@Deprecated
 	ImageProcessor distMap;
 
 	/** the flag indicating whether the image has been modified or not */
+	@Deprecated
 	boolean modif;
 
 	
 	// ==================================================
 	// Constructors 
 	
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 */
+	@Deprecated
 	public GeodesicDistanceTransformShort5x5(short[] weights)
 	{
 		this(weights, true);
 	}
 
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 */
+	@Deprecated
 	public GeodesicDistanceTransformShort5x5(ChamferWeights weights, boolean normalizeMap) 
 	{
 		this(weights.getShortWeights(), normalizeMap);
 	}
 
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 */
+	@Deprecated
 	public GeodesicDistanceTransformShort5x5(short[] weights, boolean normalizeMap) 
 	{
 		this.weights = weights;
@@ -118,6 +154,7 @@ public class GeodesicDistanceTransformShort5x5 extends AlgoStub implements Geode
 	 *      ij.process.ImageProcessor)
 	 */
 	@Override
+	@Deprecated
 	public ImageProcessor geodesicDistanceMap(ImageProcessor marker, ImageProcessor mask)
 	{
 		// size of image

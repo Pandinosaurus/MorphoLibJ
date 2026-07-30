@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -45,7 +45,9 @@ public class MorphologicalReconstructionPlugin implements PlugIn
 	 */
 	public enum Operation
 	{
+		/** reconstruction by dilation */
 		BY_DILATION("By Dilation"), 
+		/** reconstruction by erosion */
 		BY_EROSION("By Erosion");
 		
 		private final String label;
@@ -55,6 +57,17 @@ public class MorphologicalReconstructionPlugin implements PlugIn
 			this.label = label;
 		}
 		
+		/**
+		 * Process to image given as argument.
+		 * 
+		 * @param marker
+		 *            the marker image
+		 * @param mask
+		 *            the mask image
+		 * @param conn
+		 *            the connectivity to use
+		 * @return the reconstructed image
+		 */
 		public ImageProcessor applyTo(ImageProcessor marker, ImageProcessor mask, int conn) 
 		{
 			if (this == BY_DILATION)
@@ -66,6 +79,17 @@ public class MorphologicalReconstructionPlugin implements PlugIn
 					"Unable to process the " + this + " operation");
 		}
 		
+		/**
+		 * Process to image given as argument.
+		 * 
+		 * @param marker
+		 *            the marker image
+		 * @param mask
+		 *            the mask image
+		 * @param conn
+		 *            the connectivity to use
+		 * @return the reconstructed image
+		 */
 		public ImageProcessor applyTo(ImageProcessor marker, ImageProcessor mask, Connectivity2D conn) 
 		{
 			if (this == BY_DILATION)
@@ -82,6 +106,11 @@ public class MorphologicalReconstructionPlugin implements PlugIn
 			return this.label;
 		}
 		
+		/**
+		 * Returns all the labels for this enumeration.
+		 * 
+		 * @return all the labels for this enumeration.
+		 */
 		public static String[] getAllLabels()
 		{
 			int n = Operation.values().length;
@@ -165,22 +194,27 @@ public class MorphologicalReconstructionPlugin implements PlugIn
 		Connectivity2D conn = Connectivity2D.fromLabel(gd.getNextChoice());
 		
 		// Extract image procesors
-		ImageProcessor markerProc = markerImage.getProcessor();
-		ImageProcessor maskProc = maskImage.getProcessor();
-		
+		ImageProcessor marker = markerImage.getProcessor();
+		ImageProcessor mask = maskImage.getProcessor();
+		if (marker.getWidth() != mask.getWidth() || marker.getHeight() != mask.getHeight())
+		{
+		    IJ.error("Image Size Error", "Both marker and mask images must have same size");
+		    return;
+		}
+
 		long t0 = System.currentTimeMillis();
 		
-		// Compute geodesic reconstruction
-		ImageProcessor recProc = op.applyTo(markerProc, maskProc, conn);
+		// Compute morphological reconstruction
+		ImageProcessor res = op.applyTo(marker, mask, conn);
 		
 		// Keep same color model
-		recProc.setColorModel(maskProc.getColorModel());
+		res.setColorModel(mask.getColorModel());
 
 		// create resulting image
 		String newName = createResultImageName(markerImage);
-		ImagePlus resultImage = new ImagePlus(newName, recProc);
-		resultImage.copyScale(maskImage);
-		resultImage.show();
+		ImagePlus resPlus = new ImagePlus(newName, res);
+		resPlus.copyScale(maskImage);
+		resPlus.show();
 		
 		long t1 = System.currentTimeMillis();
 		IJUtils.showElapsedTime(op.toString(), t1 - t0, markerImage);

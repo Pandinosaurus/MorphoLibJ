@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -37,15 +37,17 @@ import inra.ijpb.binary.distmap.ChamferMask3D;
  * @author dlegland
  *
  */
+@Deprecated
 public class GeodesicDiameter3DFloatTest
 {
 	/**
 	 * Test method for {@link inra.ijpb.binary.geodesic.GeodesicDiameterFloat#analyzeImage(ij.process.ImageProcessor)}.
 	 */
 	@Test
+	@Deprecated
 	public void testAnalyzeImage_BatCochlea()
 	{
-		String fileName = getClass().getResource("/files/bat-cochlea-volume.tif").getFile();
+		String fileName = getClass().getResource("/files/bat-cochlea_sub25.tif").getFile();
 		ImagePlus imagePlus = IJ.openImage(fileName);
 		
 		assertNotNull(imagePlus);

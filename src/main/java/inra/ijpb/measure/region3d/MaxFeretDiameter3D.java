@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -16,6 +37,8 @@ import inra.ijpb.geometry.PointPair3D;
  * Computes maximum Feret Diameter for each region of a 3D binary or label
  * image.
  * 
+ * @see inra.ijpb.measure.region2d.MaxFeretDiameter
+ * 
  * @author dlegland
  *
  */
@@ -24,6 +47,18 @@ public class MaxFeretDiameter3D extends RegionAnalyzer3D<PointPair3D>
 	// ==================================================
 	// Static methods 
 	
+	/**
+	 * Computes Feret diameters as a PointPair3D for each of the specified
+	 * regions within a label map.
+	 * 
+	 * @param image
+	 *            the 3D label map corresponding to the label image
+	 * @param labels
+	 *            the array of region labels to process
+	 * @param calib
+	 *            the spatial calibration of the image
+	 * @return the array of 3D Feret diameter results
+	 */
 	public final static PointPair3D[] maxFeretDiameters(ImageStack image, int[] labels, Calibration calib)
 	{
 		return new MaxFeretDiameter3D().analyzeRegions(image, labels, calib);

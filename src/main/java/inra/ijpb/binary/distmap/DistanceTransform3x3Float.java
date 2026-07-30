@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -47,7 +47,7 @@ import inra.ijpb.label.LabelValues;
  * @see inra.ijpb.binary.distmap.DistanceTransform
  * @see inra.ijpb.binary.distmap.DistanceTransform3x3Short
  * 
- * @deprecated replaced by ChamferDistanceTransform2DFloat (since 1.4.4)
+ * @deprecated replaced by ChamferDistanceTransform2DFloat (since 1.5.0)
  *  
  * @author David Legland
  */
@@ -78,6 +78,7 @@ public class DistanceTransform3x3Float extends AlgoStub implements
 	 * Default constructor that specifies the chamfer weights.
 	 * @param weights an array of two weights for orthogonal and diagonal directions
 	 */
+	@Deprecated
 	public DistanceTransform3x3Float(float[] weights) 
 	{
 		this(weights, true);
@@ -93,6 +94,7 @@ public class DistanceTransform3x3Float extends AlgoStub implements
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3x3Float(ChamferWeights weights, boolean normalize)
 	{
 		this(weights.getFloatWeights(), normalize);
@@ -106,6 +108,7 @@ public class DistanceTransform3x3Float extends AlgoStub implements
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3x3Float(float[] weights, boolean normalize) 
 	{
 		this.weights = weights;
@@ -129,6 +132,7 @@ public class DistanceTransform3x3Float extends AlgoStub implements
 	 *         pixel otherwise</li>
 	 *         </ul>
 	 */
+	@Deprecated
 	public FloatProcessor distanceMap(ImageProcessor labelImage) 
 	{
 		// Initialize result

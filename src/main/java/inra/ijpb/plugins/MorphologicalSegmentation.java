@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -1115,7 +1115,7 @@ public class MorphologicalSegmentation implements PlugIn {
 								if( gradientList.getSelectedItem().equals("Internal") )
 									gradient = Morphology.internalGradient( image.getProcessor( 1 ), strel );
 								else if( gradientList.getSelectedItem().equals("External") )
-									gradient = Morphology.internalGradient( image.getProcessor( 1 ), strel );
+									gradient = Morphology.externalGradient( image.getProcessor( 1 ), strel );
 								else
 									gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
 								image = new ImageStack(image.getWidth(), image.getHeight());

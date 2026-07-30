@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -33,9 +33,17 @@ import inra.ijpb.binary.distmap.ChamferMask2D.ShortOffset;
  * Computation of geodesic distances based on a chamfer mask using short integer
  * array for storing result.
  * 
- * The maximum propagated distance is limited to Short.MAX_VALUE.
+ * This implementation also works on label maps as input.
  * 
  * All computations are performed using integers, results are stored as shorts.
+ * The maximum propagated distance is limited to Short.MAX_VALUE.
+ * 
+ * This implementation is based on iteration of forward-backward passes, until
+ * idempotence. The "hybrid" implementation is usually more efficient for
+ * complex images.
+ * 
+ * @see GeodesicDistanceTransformShortHybrid
+ * @see GeodesicDistanceTransformFloat
  * 
  * @author David Legland
  * 
@@ -45,8 +53,14 @@ public class GeodesicDistanceTransformShort extends AlgoStub implements Geodesic
 	// ==================================================
 	// Class variables
 	
+	/**
+	 * The value used to initialize the distance map.
+	 */
 	public static final short MAX_DIST = Short.MAX_VALUE;
 	
+	/**
+	 * The value associated to the background in the result image.
+	 */
 	public static final short BACKGROUND = 0;
 	
 	/**
@@ -64,23 +78,55 @@ public class GeodesicDistanceTransformShort extends AlgoStub implements Geodesic
 	// ==================================================
 	// Constructors 
 	
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 */
 	public GeodesicDistanceTransformShort(ChamferMask2D mask) 
 	{
 		this.mask = mask;
 	}
 	
-	@Deprecated
-	public GeodesicDistanceTransformShort(short[] weights) 
-	{
-		this.mask = ChamferMask2D.fromWeights(weights);
-	}
-
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 */
 	public GeodesicDistanceTransformShort(ChamferMask2D mask, boolean normalizeMap) 
 	{
 		this.mask = mask;
 		this.normalizeMap = normalizeMap;
 	}
 
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 *            
+	 * @deprecated should use an instance of ChamferMask2D at construction
+	 */
+	@Deprecated
+	public GeodesicDistanceTransformShort(short[] weights) 
+	{
+		this.mask = ChamferMask2D.fromWeights(weights);
+	}
+
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 *            
+	 * @deprecated should use an instance of ChamferMask2D at construction
+	 */
 	@Deprecated
 	public GeodesicDistanceTransformShort(short[] weights, boolean normalizeMap) 
 	{
@@ -321,12 +367,9 @@ public class GeodesicDistanceTransformShort extends AlgoStub implements Geodesic
 		int sizeY = distMap.getHeight();
 
 		// retrieve the minimum weight
-		double w0 = Double.POSITIVE_INFINITY;
-		for (ShortOffset offset : this.mask.getOffsets())
-		{
-			w0 = Math.min(w0, offset.weight);
-		}
+		double w0 = this.mask.getShortNormalizationWeight();
 		
+		// iterate over pixels within map to normalize values
 		for (int y = 0; y < sizeY; y++)
 		{
 			for (int x = 0; x < sizeX; x++)

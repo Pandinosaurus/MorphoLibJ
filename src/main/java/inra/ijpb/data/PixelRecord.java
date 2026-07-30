@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -71,6 +71,12 @@ public class PixelRecord implements Comparable<PixelRecord>{
 		seqNum = seq.getAndIncrement();
 	}
 	
+	/**
+	 * Create pixel record with cursor position and double value
+	 * @param x the x-position of the record
+	 * @param y the y-position of the record
+	 * @param value pixel intensity value
+	 */
 	public PixelRecord(
 			final int x,
 			final int y,
@@ -81,12 +87,17 @@ public class PixelRecord implements Comparable<PixelRecord>{
 		seqNum = seq.getAndIncrement();
 	}
 	
-	
+	/**
+	 * @return the position of this PixelRecord, as a Cursor2D.
+	 */
 	public Cursor2D getCursor()
 	{
 		return cursor;
 	}
 	
+	/**
+	 * @return the value stored by this PixelRecord.
+	 */
 	public double getValue()
 	{
 		return value;

@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -31,6 +31,14 @@ public class Cursor2D
 	private int x = 0;
 	private int y = 0;	
 		
+	/**
+	 * Creates a new cursor from two coordinates.
+	 * 
+	 * @param x
+	 *            the x-coordinate
+	 * @param y
+	 *            the y-coordinate
+	 */
 	public Cursor2D(
 			int x,
 			int y )
@@ -39,6 +47,14 @@ public class Cursor2D
 		this.y = y;
 	}
 	
+	/**
+	 * Sets the position of this cursor.
+	 * 
+	 * @param x
+	 *            the new x-coordinate
+	 * @param y
+	 *            the new y-coordinate
+	 */
 	public void set( 
 			int x, 
 			int y )
@@ -47,11 +63,17 @@ public class Cursor2D
 		this.y = y;
 	}
 	
+	/**
+	 * @return the x-position of this cursor
+	 */
 	public int getX()
 	{
 		return x;
 	}
 	
+	/**
+	 * @return the y-position of this cursor
+	 */
 	public int getY()
 	{
 		return y;

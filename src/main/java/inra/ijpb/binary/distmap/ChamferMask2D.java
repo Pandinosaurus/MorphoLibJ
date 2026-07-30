@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -14,6 +35,9 @@ import java.util.Collection;
  * in classical two-passes algorithms.
  * 
  * The weights may be defined either as integers or as floating point values.
+ * 
+ * @see ChamferMask3D
+ * @see ChamferDistanceTransform2D
  * 
  * @author dlegland
  */
@@ -32,16 +56,16 @@ public abstract class ChamferMask2D
 	public final static ChamferMask2D CITY_BLOCK = new ChamferMask2DW2(1, 2);
 	
 	/**
-	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors,
-	 * and 5 for cube-diagonals (best approximation for 3-by-3-by-3 masks).
+	 * Use weights 1 for orthogonal neighbors and sqrt(2) for diagonal neighbors.
+	 * Integer weights are 10 and 14.
 	 */
 	public final static ChamferMask2D QUASI_EUCLIDEAN = new ChamferMask2DW2Float( 
 			new short[] { 10, 14 }, 
 			new float[] {1, (float) Math.sqrt(2) });
 
 	/**
-	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors,
-	 * and 5 for cube-diagonals (best approximation for 3-by-3-by-3 masks).
+	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors
+	 * (best approximation for 3-by-3 masks).
 	 */
 	public final static ChamferMask2D BORGEFORS = new ChamferMask2DW2(3, 4);
 	
@@ -50,11 +74,35 @@ public abstract class ChamferMask2D
 	 * for chess-knight moves (recommended approximation for 5-by-5 masks).
 	 */
 	public final static ChamferMask2D CHESSKNIGHT = new ChamferMask2DW3(5, 7, 11);
+
+	/**
+	 * Chamfer mask in the 7-by-7 neighborhood defined using four weights.
+	 * Weights are 12, 17, 27, and 38. The "sixth" is approximated by 17+27=44,
+	 * very close from the value proposed by Borgefors (1986).
+	 */
+	public final static ChamferMask2D VERWER = new ChamferMask2DW4(12, 17, 27, 38);
 	
 	
 	// ==================================================
 	// Static factories
 	
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3, the second element corresponds
+	 * to the weight of diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 5-by-5, the third element corresponds
+	 * to the weight of chess-knight move offsets</li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask2D fromWeights(int[] weights)
 	{
 		if (weights.length == 1)
@@ -81,6 +129,23 @@ public abstract class ChamferMask2D
 		}
 	}
 	
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3, the second element corresponds
+	 * to the weight of diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 5-by-5, the third element corresponds
+	 * to the weight of chess-knight move offsets</li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask2D fromWeights(short[] weights)
 	{
 		if (weights.length == 1)
@@ -107,6 +172,23 @@ public abstract class ChamferMask2D
 		}
 	}
 	
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3, the second element corresponds
+	 * to the weight of diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 5-by-5, the third element corresponds
+	 * to the weight of chess-knight move offsets</li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask2D fromWeights(float[] weights)
 	{
 		// compute integer version of floating point weights
@@ -132,7 +214,7 @@ public abstract class ChamferMask2D
 	// Global methods
 	
 	/**
-	 * @return the whole collection of offsets defined by this ChamferWeights2D.
+	 * @return the whole collection of offsets defined by this ChamferMask2D.
 	 */
 	public Collection<ShortOffset> getOffsets()
 	{
@@ -144,7 +226,7 @@ public abstract class ChamferMask2D
 	
 	/**
 	 * @return the whole collection of offsets using floating-point weights
-	 *         defined by this ChamferWeights2D.
+	 *         defined by this ChamferMask2D.
 	 */
 	public Collection<FloatOffset> getFloatOffsets()
 	{
@@ -159,19 +241,19 @@ public abstract class ChamferMask2D
 	// Declaration of abstract methods
 	
 	/**
-	 * @return the set of offsets defined by this ChamferWeights2D for forward
+	 * @return the set of offsets defined by this ChamferMask2D for forward
 	 *         iteration using integer weights.
 	 */
 	public abstract Collection<ShortOffset> getForwardOffsets();
 
 	/**
-	 * @return the set of offsets defined by this ChamferWeights2D for backward
+	 * @return the set of offsets defined by this ChamferMask2D for backward
 	 *         iteration using integer weights.
 	 */
 	public abstract Collection<ShortOffset> getBackwardOffsets();
 	
 	/**
-	 * @return the set of offsets defined by this ChamferWeights2D for forward
+	 * @return the set of offsets defined by this ChamferMask2D for forward
 	 *         iteration using floating-point weights.
 	 */
 	public Collection<FloatOffset> getForwardFloatOffsets()
@@ -180,7 +262,7 @@ public abstract class ChamferMask2D
 	}
 	
 	/**
-	 * @return the set of offsets defined by this ChamferWeights2D for backward
+	 * @return the set of offsets defined by this ChamferMask2D for backward
 	 *         iteration using floating-point weights.
 	 */
 	public Collection<FloatOffset> getBackwardFloatOffsets()
@@ -224,10 +306,23 @@ public abstract class ChamferMask2D
 	 */
 	public static class ShortOffset
 	{
+		/** The offset along the X-axis */
 		public final int dx;
+		/** The offset along the Y-axis */
 		public final int dy;
+		/** The weight associated to this offset */
 		public final short weight;
 
+		/**
+		 * Creates a new Offset using a 16-bits integer weight.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param weight
+		 *            the weight of the offset
+		 */
 		public ShortOffset(int dx, int dy, short weight)
 		{
 			this.dx = dx;
@@ -242,11 +337,23 @@ public abstract class ChamferMask2D
 	 */
 	public static class FloatOffset
 	{
+		/** The offset along the X-axis */
 		public final int dx;
+		/** The offset along the Y-axis */
 		public final int dy;
+		/** The weight associated to this offset */
 		public final float weight;
 
-		public FloatOffset(int dx, int dy, float weight)
+		/**
+		 * Creates a new Offset using a floating point weight.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param weight
+		 *            the weight of the offset
+		 */		public FloatOffset(int dx, int dy, float weight)
 		{
 			this.dx = dx;
 			this.dy = dy;

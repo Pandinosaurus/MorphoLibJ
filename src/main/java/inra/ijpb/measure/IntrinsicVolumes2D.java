@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -19,7 +40,7 @@ import inra.ijpb.measure.region2d.IntrinsicVolumes2DUtils;
  * images should be specified as an array of integers.
  * 
  * @see IntrinsicVolumes3D
- * @see inra.ijpb.measure.region2d.IntrinsicVolumesAnalyzer2D
+ * @see inra.ijpb.measure.region2d.IntrinsicVolumes2D
  * @see inra.ijpb.measure.region2d.IntrinsicVolumes2DUtils
  * 
  * @author dlegland
@@ -274,7 +295,7 @@ public class IntrinsicVolumes2D
      *            the spatial calibration
      * @return the calibrated area of the sampling window
      */
-    private static final double samplingArea(ImageProcessor image, Calibration calib)
+    public static final double samplingArea(ImageProcessor image, Calibration calib)
     {
         // size of image
         int sizeX = image.getWidth();

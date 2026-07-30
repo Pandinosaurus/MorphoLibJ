@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 package inra.ijpb.label;
 
 import java.awt.Point;
@@ -15,13 +36,6 @@ import inra.ijpb.data.Cursor3D;
  */
 public class LabelValues
 {
-	/**
-	 * Private constructor to prevent class instantiation.
-	 */
-	private LabelValues()
-	{
-	}
-	
 	/**
 	 * Computes the largest value within the <code>valueImage</code>, using the
 	 * strictly positive values in <code>labelImage</code> as mask. Can be used
@@ -465,7 +479,7 @@ public class LabelValues
 				{
 					int label = (int) labelImage.getVoxel(x, y, z);
 
-					// do not process pixels that do not belong to any particle
+					// do not process voxels that do not belong to any particle
 					if (label == 0)
 						continue;
 					if (!labelIndices.containsKey(label))
@@ -527,9 +541,10 @@ public class LabelValues
 			{
 				int label = (int) labelImage.getf(x, y);
 				
+				// do not process background pixels
+				if (label == 0) continue;
 				// do not process pixels that do not belong to any particle
-				if (label == 0)
-					continue;
+				if (!labelIndices.containsKey(label)) continue;
 
 				int index = labelIndices.get(label);
 				
@@ -595,9 +610,10 @@ public class LabelValues
 				{
 					int label = (int) labelImage.getVoxel(x, y, z);
 
-					// do not process pixels that do not belong to any particle
-					if (label == 0)
-						continue;
+					// do not process background voxels
+					if (label == 0) continue;
+					// do not process voxels that do not belong to any particle
+					if (!labelIndices.containsKey(label)) continue;
 
 					int index = labelIndices.get(label);
 
@@ -653,9 +669,10 @@ public class LabelValues
 			{
 				int label = (int) labelImage.getf(x, y);
 				
+				// do not process background pixels
+				if (label == 0) continue;
 				// do not process pixels that do not belong to any particle
-				if (label == 0)
-					continue;
+				if (!labelIndices.containsKey(label)) continue;
 
 				int index = labelIndices.get(label);
 				
@@ -721,9 +738,10 @@ public class LabelValues
 				{
 					int label = (int) labelImage.getVoxel(x, y, z);
 
-					// do not process pixels that do not belong to any particle
-					if (label == 0)
-						continue;
+					// do not process background voxels
+					if (label == 0) continue;
+					// do not process voxels that do not belong to any particle
+					if (!labelIndices.containsKey(label)) continue;
 
 					int index = labelIndices.get(label);
 
@@ -741,47 +759,98 @@ public class LabelValues
 		return posMax;
 	}
 
+	/**
+	 * Inner class for storing a value associated to a 2D position.
+	 */
 	public static class PositionValuePair
 	{
 		Point position;
 		double value;
 		
+		/**
+		 * Creates a new PositionValuePair instance based on a position and a
+		 * value.
+		 * 
+		 * @param position
+		 *            the position of the pixel
+		 * @param value
+		 *            the value of the pixel
+		 */
 		public PositionValuePair(Point position, double value)
 		{
 			this.position = position;
 			this.value = value;
 		}
 		
+		/**
+		 * Returns the position of the pixel.
+		 * 
+		 * @return the position of the pixel.
+		 */
 		public Point getPosition()
 		{
 			return position;
 		}
 		
+		/**
+		 * Returns the value of the pixel.
+		 * 
+		 * @return the value of the pixel.
+		 */
 		public double getValue()
 		{
 			return value;
 		}
 	}
 
+	/**
+	 * Inner class for storing a value associated to a 3D position.
+	 */
 	public static class Position3DValuePair
 	{
 		Cursor3D position;
 		double value;
 		
+		/**
+		 * Creates a new Position3DValuePair instance based on a position and a
+		 * value.
+		 * 
+		 * @param position
+		 *            the 3D position of the voxel
+		 * @param value
+		 *            the value of the voxel
+		 */
 		public Position3DValuePair(Cursor3D position, double value)
 		{
 			this.position = position;
 			this.value = value;
 		}
 		
+		/**
+		 * Returns the position of the voxel.
+		 * 
+		 * @return the position of the voxel.
+		 */
 		public Cursor3D getPosition()
 		{
 			return position;
 		}
 		
+		/**
+		 * Returns the value of the voxel.
+		 * 
+		 * @return the value of the voxel.
+		 */
 		public double getValue()
 		{
 			return value;
 		}
+	}
+	
+	/**
+	 * Private constructor to prevent class instantiation.
+	 */
+	private LabelValues()
+	{
 	}
 }

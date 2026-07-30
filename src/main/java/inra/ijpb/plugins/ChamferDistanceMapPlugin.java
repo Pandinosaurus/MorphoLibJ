@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -30,21 +30,25 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 import inra.ijpb.algo.DefaultAlgoListener;
-import inra.ijpb.binary.distmap.ChamferDistanceTransform2DFloat;
-import inra.ijpb.binary.distmap.ChamferDistanceTransform2DShort;
 import inra.ijpb.binary.distmap.ChamferMask2D;
 import inra.ijpb.binary.distmap.ChamferMasks2D;
-import inra.ijpb.binary.distmap.DistanceTransform;
+import inra.ijpb.label.distmap.ChamferDistanceTransform2DFloat;
+import inra.ijpb.label.distmap.ChamferDistanceTransform2DShort;
+import inra.ijpb.label.distmap.DistanceTransform2D;
 
 /**
- * Compute distance map, with possibility to choose chamfer weights, result
- * type, and to normalize result or not.
+ * Compute distance map, with possibility to choose the chamfer mask, the result
+ * type (integer or floating point), and to normalize result or not.
  *
  * Can process either binary images, or label images (that can be coded with 8,
  * 16 or 32 bits).
  * 
+ * @see inra.ijpb.label.distmap.DistanceTransform2D
+ * @see inra.ijpb.binary.distmap.ChamferMask2D
+ * @see inra.ijpb.label.distmap.ChamferDistanceTransform2DShort
+ * @see inra.ijpb.label.distmap.ChamferDistanceTransform2DFloat
+ * 
  * @author dlegland
- *
  */
 public class ChamferDistanceMapPlugin
 		implements ExtendedPlugInFilter, DialogListener
@@ -103,7 +107,7 @@ public class ChamferDistanceMapPlugin
 		// Create a new generic dialog with appropriate options
 		GenericDialog gd = new GenericDialog("Chamfer Distance Transform");
 		gd.addChoice("Distances", ChamferMasks2D.getAllLabels(),
-				ChamferMasks2D.BORGEFORS.toString());
+				ChamferMasks2D.CHESSKNIGHT.toString());
 		String[] outputTypes = new String[] { "16 bits", "32 bits" };
 		gd.addChoice("Output Type", outputTypes, outputTypes[0]);
 		gd.addCheckbox("Normalize weights", true);
@@ -171,18 +175,18 @@ public class ChamferDistanceMapPlugin
 		}
 	}
 
-	private ImageProcessor process(ImageProcessor image, ChamferMask2D weights,
+	private ImageProcessor process(ImageProcessor image, ChamferMask2D mask,
 			boolean processFloat, boolean normalize)
 	{
 		// Initialize calculator
-		DistanceTransform algo;
+		DistanceTransform2D algo;
 		if (processFloat)
 		{
-			algo = new ChamferDistanceTransform2DFloat(weights, normalize);
+			algo = new ChamferDistanceTransform2DFloat(mask, normalize);
 		}
 		else
 		{
-			algo = new ChamferDistanceTransform2DShort(weights, normalize);
+			algo = new ChamferDistanceTransform2DShort(mask, normalize);
 		}
 		
 		// add monitoring

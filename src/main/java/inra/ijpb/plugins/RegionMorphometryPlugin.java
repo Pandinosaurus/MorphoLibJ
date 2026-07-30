@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -31,6 +31,11 @@ import ij.process.ImageProcessor;
 import inra.ijpb.label.LabelImages;
 import inra.ijpb.measure.GeometricMeasures2D;
 
+/**
+ * Plugin for computing morphology of regions.
+ * 
+ * @deprecated replaced by AnalyzeRegions
+ */
 @Deprecated
 public class RegionMorphometryPlugin implements PlugInFilter {
 
@@ -40,6 +45,7 @@ public class RegionMorphometryPlugin implements PlugInFilter {
     /**
      * List of available numbers of directions
      */
+	@Deprecated
     public final static String[] dirNumberLabels = {
             "2 directions", 
             "4 directions" 
@@ -48,6 +54,7 @@ public class RegionMorphometryPlugin implements PlugInFilter {
     /**
      *  Array of weights, in the same order than the array of names.
      */
+	@Deprecated
     public final static int[] dirNumbers = {
         2, 4
     };
@@ -61,8 +68,10 @@ public class RegionMorphometryPlugin implements PlugInFilter {
      * the console, and the number of counts for each direction is included in
      * results table. 
      */
+	@Deprecated
     public boolean debug  = false;
     
+	@Deprecated
 	ImagePlus imagePlus;
 	
     
@@ -73,6 +82,7 @@ public class RegionMorphometryPlugin implements PlugInFilter {
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
+	@Deprecated
 	public int setup(String arg, ImagePlus imp) {
 		if (imp == null) {
 			IJ.noImage();
@@ -86,6 +96,7 @@ public class RegionMorphometryPlugin implements PlugInFilter {
 	/* (non-Javadoc)
      * @see ij.plugin.PlugIn#run(java.lang.String)
      */
+	@Deprecated
     public void run(ImageProcessor ip) {
         
         // check if image is a label image
@@ -104,6 +115,16 @@ public class RegionMorphometryPlugin implements PlugInFilter {
 		table.show(tableName);
     }
     
+    /**
+	 * Process the input image.
+	 * 
+	 * @param inputImage
+	 *            the image to process
+	 * @param nDirs
+	 *            the number of directions to use
+	 * @return the results table containing morphometry features of regions
+	 */
+	@Deprecated
     public ResultsTable process(ImagePlus inputImage, int nDirs) 
     {
         // Check validity of parameters
@@ -133,6 +154,15 @@ public class RegionMorphometryPlugin implements PlugInFilter {
 		return results;
     }
     
+    /**
+	 * Process the input image.
+	 * 
+	 * @param inputImage
+	 *            the image to process
+	 * @param nDirs
+	 *            the number of directions to use
+	 * @return the results table containing morphometry features of regions
+	 */
     @Deprecated
     public Object[] exec(ImagePlus inputImage, int nDirs) {
         // Check validity of parameters

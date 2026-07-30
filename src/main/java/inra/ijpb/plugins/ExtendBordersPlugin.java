@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -93,7 +93,7 @@ public class ExtendBordersPlugin implements PlugIn
 			BorderManager border = borderType.createBorderManager(image);
 
 			// Execute core of the plugin
-			ImageProcessor res = process(image, left, right, top, bottom, border);
+            ImageProcessor res = border.addBorders(image, left, right, top, bottom);
 			resPlus = new ImagePlus(imagePlus.getShortTitle()+"-ext", res);
 		}
 		else
@@ -105,7 +105,7 @@ public class ExtendBordersPlugin implements PlugIn
 			BorderManager3D border = borderType.createBorderManager(image);
 
 			// Execute core of the plugin
-			ImageStack res = process(image, left, right, top, bottom, front, back, border);
+            ImageStack res = border.addBorders(image, left, right, top, bottom, front, back);
 			resPlus = new ImagePlus(imagePlus.getShortTitle()+"-ext", res);			
 		}
 		
@@ -114,18 +114,8 @@ public class ExtendBordersPlugin implements PlugIn
 		resPlus.show();
 	}
 	
-	@Deprecated
-	public ImagePlus exec(ImagePlus image, int left, int right, int top,
-			int bottom, BorderManager border)
-	{
-		ImageProcessor proc = image.getProcessor();
-		ImageProcessor result = process(proc, left, right, top, bottom, border);
-		return new ImagePlus(image.getTitle(), result);
-	}
-
 	/**
-	 * Adds the specified number of pixels around the input image, and returns
-	 * the resulting image. 
+	 * run the plugin (deprecated).
 	 * 
 	 * @param image
 	 *            the input image
@@ -142,6 +132,39 @@ public class ExtendBordersPlugin implements PlugIn
 	 *            pixels to be added
 	 * @return a new image with extended borders
 	 */
+	@Deprecated
+	public ImagePlus exec(ImagePlus image, int left, int right, int top,
+			int bottom, BorderManager border)
+	{
+		ImageProcessor proc = image.getProcessor();
+		ImageProcessor result = process(proc, left, right, top, bottom, border);
+		return new ImagePlus(image.getTitle(), result);
+	}
+
+	/**
+	 * Adds the specified number of pixels around the input image, and returns
+	 * the resulting image. 
+	 * 
+     * @deprecated replaced by inra.ijpb.data.border.BorderManager.addBorders(...) method
+     * 
+     * @see inra.ijpb.data.border.BorderManager#addBorders(ImageProcessor, int, int, int, int)
+     * 
+	 * @param image
+	 *            the input image
+	 * @param left
+	 *            the number of pixels to add to the left of the image
+	 * @param right
+	 *            the number of pixels to add to the right of the image
+	 * @param top
+	 *            the number of pixels to add on top of the image
+	 * @param bottom
+	 *            the number of pixels to add at the bottom of the image
+	 * @param border
+	 *            an instance of BorderManager that specifies the value of
+	 *            pixels to be added
+	 * @return a new image with extended borders
+	 */
+	@Deprecated
 	public static final ImageProcessor process(ImageProcessor image, 
 			int left, int right, int top, int bottom, BorderManager border)
 	{
@@ -165,9 +188,14 @@ public class ExtendBordersPlugin implements PlugIn
 		
 		return result;
 	}
+	
 	/**
 	 * Adds the specified number of pixels around the input image, and returns
 	 * the resulting image. 
+	 * 
+	 * @deprecated replaced by inra.ijpb.data.border.BorderManager3D.addBorders(...) method
+	 * 
+	 * @see inra.ijpb.data.border.BorderManager3D#addBorders(ImageStack, int, int, int, int, int, int)
 	 * 
 	 * @param image
 	 *            the input image stack 
@@ -188,6 +216,7 @@ public class ExtendBordersPlugin implements PlugIn
 	 *            pixels to be added
 	 * @return a new image with extended borders
 	 */
+    @Deprecated
 	public static final ImageStack process(ImageStack image, 
 			int left, int right, int top, int bottom, int front, int back, BorderManager3D border)
 	{

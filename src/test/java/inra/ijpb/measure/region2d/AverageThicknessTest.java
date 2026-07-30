@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -24,7 +45,7 @@ public class AverageThicknessTest
      * Test method for {@link inra.ijpb.measure.region2d.AverageThickness#analyzeRegions(ij.process.ImageProcessor, int[], ij.measure.Calibration)}.
      */
     @Test
-    public final void testAnalyzeRegionsImageProcessorIntArrayCalibration()
+    public final void test_process_rectangle()
     {
         ImageProcessor image = new ByteProcessor(12, 8);
         for (int y = 2; y <= 6; y++)
@@ -43,12 +64,12 @@ public class AverageThicknessTest
         assertEquals(1, results.length);
         
         Result res = results[0];
-        assertTrue(res.meanDist > 2);
-        assertTrue(res.meanDist <= 3);
+        assertTrue(res.meanDist_Pixels > 2);
+        assertTrue(res.meanDist_Pixels <= 3);
     }
 
     @Test
-    public void test_process_ThinLines_TouchingLabels()
+    public final void test_process_ThinLines_TouchingLabels()
     {
         // Create a synthetic image containing 5 bars
         // bar 1: x =  0 ->  2,  y = 0 -> 9, label 2
@@ -81,8 +102,8 @@ public class AverageThicknessTest
         for (int i = 0; i < labels.length; i++)
         {
             Result res = results[i];
-            assertTrue(res.meanDist > 1.5);
-            assertTrue(res.meanDist < 2.5);
+            assertTrue(res.meanDist_Pixels > 1.5);
+            assertTrue(res.meanDist_Pixels < 2.5);
         }
     }
 }

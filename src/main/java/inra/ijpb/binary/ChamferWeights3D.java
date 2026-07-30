@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -45,7 +45,7 @@ import java.util.Collection;
  * ImageStack result = dt.distanceMap(inputStack);
  * </code></pre>
  *
- * @deprecated replaced by inra.ijpb.binary.distmap.ChamferMask2D (since 1.4.4)
+ * @deprecated replaced by inra.ijpb.binary.distmap.ChamferMask2D (since 1.5.0)
  * 
  * @see BinaryImages#distanceMap(ij.ImageStack)
  * @see inra.ijpb.binary.distmap.DistanceTransform3D
@@ -54,17 +54,20 @@ import java.util.Collection;
 public enum ChamferWeights3D
 {
 	/** Use weight equal to 1 for all neighbors */
+	@Deprecated
 	CHESSBOARD("Chessboard (1,1,1)", new short[] { 1, 1, 1 }), 
 	/**
 	 * Use weights 1 for orthogonal neighbors and 2 for diagonal neighbors,
 	 * and 3 for cube-diagonals.
 	 */
+	@Deprecated
 	CITY_BLOCK("City-Block (1,2,3)", new short[] { 1, 2, 3 }), 
 	/**
 	 * Use weights 1 for orthogonal neighbors and sqrt(2) for diagonal
 	 * neighbors, and sqrt(3) for cube-diagonals. 
 	 * Use 10, 14 and 17 for short version.
 	 */
+	@Deprecated
 	QUASI_EUCLIDEAN("Quasi-Euclidean (1,1.41,1.73)", 
 			new short[] { 10, 14, 17 },
 			new float[] { 1, (float) Math.sqrt(2), (float) Math.sqrt(3) }),	
@@ -72,6 +75,7 @@ public enum ChamferWeights3D
 	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors,
 	 * and 5 for cube-diagonals (best approximation for 3-by-3-by-3 masks).
 	 */
+	@Deprecated
 	BORGEFORS("Borgefors (3,4,5)", new short[] { 3, 4, 5 }),
 
 	/**
@@ -79,6 +83,7 @@ public enum ChamferWeights3D
 	 * 5 for cube-diagonals, and 7 for (2,1,1) shifts. Good approximation using
 	 * only four weights, and keeping low value of orthogonal weight.
 	 */
+	@Deprecated
 	WEIGHTS_3_4_5_7("Svensson <3,4,5,7>", new short[] { 3, 4, 5, 7 });
 
 	private final String label;
@@ -102,21 +107,37 @@ public enum ChamferWeights3D
 		this.floatWeights = floatWeights;
 	}
 
+	/**
+	 * @return the weights as shorts
+	 */
+	@Deprecated
 	public short[] getShortWeights()
 	{
 		return this.shortWeights;
 	}
 
+	/**
+	 * @return the weights as floats
+	 */
+	@Deprecated
 	public float[] getFloatWeights()
 	{
 		return this.floatWeights;
 	}
 
+	/**
+	 * @return the label associated to this chamfer weight
+	 */
+	@Deprecated
 	public String toString()
 	{
 		return this.label;
 	}
 
+	/**
+	 * @return all the chamfer weights labels
+	 */
+	@Deprecated
 	public static String[] getAllLabels()
 	{
 		int n = ChamferWeights3D.values().length;
@@ -138,6 +159,7 @@ public enum ChamferWeights3D
 	 * @throws IllegalArgumentException
 	 *             if label name is not recognized.
 	 */
+	@Deprecated
 	public static ChamferWeights3D fromLabel(String label)
 	{
 		if (label != null)
@@ -179,6 +201,7 @@ public enum ChamferWeights3D
 	 * @return a collection of offset encapsulating the shift in x, y and z
 	 *         directions, and the associated weight.
 	 */
+	@Deprecated
 	public static Collection<ShortOffset> getForwardOffsets(short[] weights)
 	{
 		int nWeights = weights.length;
@@ -256,6 +279,7 @@ public enum ChamferWeights3D
 	 * @return a collection of offset encapsulating the shift in x, y and z
 	 *         directions, and the associated weight.
 	 */
+	@Deprecated
 	public static Collection<FloatOffset> getForwardOffsets(float[] weights)
 	{
 		int nWeights = weights.length;
@@ -333,6 +357,7 @@ public enum ChamferWeights3D
 	 * @return a collection of offset encapsulating the shift in x, y and z
 	 *         directions, and the associated weight.
 	 */
+	@Deprecated
 	public static Collection<ShortOffset> getBackwardOffsets(short[] weights)
 	{
 		int nWeights = weights.length;
@@ -410,6 +435,7 @@ public enum ChamferWeights3D
 	 * @return a collection of offset encapsulating the shift in x, y and z
 	 *         directions, and the associated weight.
 	 */
+	@Deprecated
 	public static Collection<FloatOffset> getBackwardOffsets(float[] weights)
 	{
 		int nWeights = weights.length;
@@ -462,13 +488,38 @@ public enum ChamferWeights3D
 		return offsets;
 	}
 
+	/**
+	 * The class for storing Chamfer offsets using integer weights.
+	 */
+	@Deprecated
 	public static class ShortOffset
 	{
+		/** the offset along the X-axis */
+		@Deprecated
 		public final int dx;
+		/** the offset along the Y-axis */
+		@Deprecated
 		public final int dy;
+		/** the offset along the Z-axis */
+		@Deprecated
 		public final int dz;
+		/** the weight associated to this offset */
+		@Deprecated
 		public final short weight;
 
+		/**
+		 * Creates a new offset for integer computations.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param dz
+		 *            the offset along the Z-axis
+		 * @param weight
+		 *            the weight associated to this offset
+		 */
+		@Deprecated
 		public ShortOffset(int dx, int dy, int dz, short weight)
 		{
 			this.dx = dx;
@@ -478,13 +529,38 @@ public enum ChamferWeights3D
 		}
 	}
 
+	/**
+	 * The class for storing Chamfer offsets using floating-point weights.
+	 */
+	@Deprecated
 	public static class FloatOffset
 	{
+		/** the offset along the X-axis */
+		@Deprecated
 		public final int dx;
+		/** the offset along the Y-axis */
+		@Deprecated
 		public final int dy;
+		/** the offset along the Z-axis */
+		@Deprecated
 		public final int dz;
+		/** the weight associated to this offset */
+		@Deprecated
 		public final float weight;
 
+		/**
+		 * Creates a new offset for floating point computations.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param dz
+		 *            the offset along the Z-axis
+		 * @param weight
+		 *            the weight associated to this offset
+		 */
+		@Deprecated
 		public FloatOffset(int dx, int dy, int dz, float weight)
 		{
 			this.dx = dx;

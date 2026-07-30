@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -30,7 +30,6 @@ import org.junit.runners.Suite;
 	// generic classes
 	GeodesicDistanceTransformFloatTest.class,
 	GeodesicDistanceTransformShortTest.class,
-	GeodesicDiameter3DFloatTest.class,
 })
 public class AllTests {
   //nothing

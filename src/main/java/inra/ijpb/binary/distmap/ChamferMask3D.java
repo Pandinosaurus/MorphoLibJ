@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -14,6 +35,9 @@ import java.util.Collection;
  * be defined as integers (making it possible to store result in
  * ShortProcessors) or as floating point values (could be more precise).
  * 
+ * @see ChamferMask2D
+ * @see ChamferDistanceTransform3D
+ *
  * @author dlegland
  *
  */
@@ -26,19 +50,19 @@ public abstract class ChamferMask3D
 	public final static ChamferMask3D CHESSBOARD = new ChamferMask3DW3(new short[] {1, 1, 1});
 	
 	/**
-	 * Use weights 1 for orthogonal neighbors and 2 for diagonal neighbors,
+	 * Use weights 1 for orthogonal neighbors, 2 for square-diagonal neighbors,
 	 * and 3 for cube-diagonals.
 	 */
 	public final static ChamferMask3D CITY_BLOCK = new ChamferMask3DW3(new short[] {1, 2, 3});
 	
 	/**
-	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors,
+	 * Use weights 3 for orthogonal neighbors, 4 for square-diagonal neighbors,
 	 * and 5 for cube-diagonals (best approximation for 3-by-3-by-3 masks).
 	 */
 	public final static ChamferMask3D BORGEFORS = new ChamferMask3DW3(new short[] {3, 4, 5});
 	
 	/**
-	 * Use weights 1 for orthogonal neighbors and sqrt(2) for diagonal
+	 * Use weights 1 for orthogonal neighbors, sqrt(2) for square-diagonal
 	 * neighbors, and sqrt(3) for cube-diagonals. 
 	 * Use 10, 14 and 17 for short version.
 	 */
@@ -47,9 +71,9 @@ public abstract class ChamferMask3D
 			new float[] { 1, (float) Math.sqrt(2), (float) Math.sqrt(3) });
 
 	/**
-	 * Use weights 3 for orthogonal neighbors and 4 for diagonal neighbors, and
+	 * Use weights 3 for orthogonal neighbors, 4 for square-diagonal neighbors,
 	 * 5 for cube-diagonals, and 7 for (2,1,1) shifts. Good approximation using
-	 * only four weights, and keeping low value of orthogonal weight.
+	 * only four weights, and keeping low value for orthogonal weight.
 	 */
 	public final static ChamferMask3D SVENSSON_3_4_5_7 = new ChamferMask3DW4(3, 4, 5, 7);
 	
@@ -57,6 +81,25 @@ public abstract class ChamferMask3D
 	// ==================================================
 	// Static factories
 	
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3-by-3, the second element corresponds
+	 * to the weight of square-diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 3-by-3-by-3, the third element corresponds
+	 * to the weight of cube-diagonal offsets</li>
+	 * <li>four elements: chamfer mask is 5-by-5-by-5, the fourth element corresponds
+	 * to the weight of (1,1,2) offset and its permutations and symmetries </li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask3D fromWeights(int[] weights)
 	{
 		if (weights.length == 1)
@@ -91,6 +134,25 @@ public abstract class ChamferMask3D
 		}
 	}
 	
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3-by-3, the second element corresponds
+	 * to the weight of square-diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 3-by-3-by-3, the third element corresponds
+	 * to the weight of cube-diagonal offsets</li>
+	 * <li>four elements: chamfer mask is 5-by-5-by-5, the fourth element corresponds
+	 * to the weight of (1,1,2) offset and its permutations and symmetries </li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask3D fromWeights(short[] weights)
 	{
 		if (weights.length == 1)
@@ -125,6 +187,25 @@ public abstract class ChamferMask3D
 		}
 	}
 
+	/**
+	 * Creates a new Chamfer mask from a list of weights.
+	 * 
+	 * The size of the chamfer mask depends on the length of the array:
+	 * <ul>
+	 * <li>single element: chamfer mask is 3-by-3-by-3, the element value corresponds
+	 * to the weight of orthogonal offsets</li>
+	 * <li>two elements: chamfer mask is 3-by-3-by-3, the second element corresponds
+	 * to the weight of square-diagonal offsets</li>
+	 * <li>three elements: chamfer mask is 3-by-3-by-3, the third element corresponds
+	 * to the weight of cube-diagonal offsets</li>
+	 * <li>four elements: chamfer mask is 5-by-5-by-5, the fourth element corresponds
+	 * to the weight of (1,1,2) offset and its permutations and symmetries </li>
+	 * </ul>
+	 * 
+	 * @param weights
+	 *            the list of weights used for building the chamfer mask
+	 * @return the chamfer mask corresponding to the weights
+	 */
 	public static final ChamferMask3D fromWeights(float[] weights)
 	{
 		// compute integer version of floating point weights
@@ -243,11 +324,27 @@ public abstract class ChamferMask3D
 	 */
 	public static class ShortOffset
 	{
+		/** the offset along the X-axis */
 		public final int dx;
+		/** the offset along the Y-axis */
 		public final int dy;
+		/** the offset along the Z-axis */
 		public final int dz;
+		/** the weight associated to this offset */
 		public final short weight;
 
+		/**
+		 * Creates a new Offset using a 16-bits integer weight.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param dz
+		 *            the offset along the Z-axis
+		 * @param weight
+		 *            the weight of the offset
+		 */
 		public ShortOffset(int dx, int dy, int dz, short weight)
 		{
 			this.dx = dx;
@@ -263,11 +360,27 @@ public abstract class ChamferMask3D
 	 */
 	public static class FloatOffset
 	{
+		/** the offset along the X-axis */
 		public final int dx;
+		/** the offset along the Y-axis */
 		public final int dy;
+		/** the offset along the Z-axis */
 		public final int dz;
+		/** the weight associated to this offset */
 		public final float weight;
 
+		/**
+		 * Creates a new Offset using a floating point weight.
+		 * 
+		 * @param dx
+		 *            the offset along the X-axis
+		 * @param dy
+		 *            the offset along the Y-axis
+		 * @param dz
+		 *            the offset along the Z-axis
+		 * @param weight
+		 *            the weight of the offset
+		 */
 		public FloatOffset(int dx, int dy, int dz, float weight)
 		{
 			this.dx = dx;

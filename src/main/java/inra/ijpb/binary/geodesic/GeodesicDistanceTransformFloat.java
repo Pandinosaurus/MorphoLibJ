@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -31,7 +31,16 @@ import inra.ijpb.binary.distmap.ChamferMask2D.FloatOffset;
 
 /**
  * Computation of Chamfer geodesic distances using floating point array for
- * storing result, and 3-by-3 chamfer masks.
+ * storing result.
+ * 
+ * This implementation also works on label maps as input.
+ * 
+ * This implementation is based on iteration of forward-backward passes, until
+ * idempotence. The "hybrid" implementation is usually more efficient for
+ * complex images.
+ * 
+ * @see GeodesicDistanceTransformFloatHybrid
+ * @see GeodesicDistanceTransformShort
  * 
  * @author David Legland
  * 
@@ -42,7 +51,15 @@ public class GeodesicDistanceTransformFloat extends AlgoStub implements
 	// ==================================================
 	// Class variables
 	
+	/**
+	 * The value used to initialize the distance map, corresponding to positive
+	 * infinity.
+	 */
 	public static final float MAX_DIST = Float.POSITIVE_INFINITY;
+	
+	/**
+	 * The value associated to the background in the result image.
+	 */
 	public static final float BACKGROUND = Float.NaN;
 	
 	/**
@@ -60,23 +77,51 @@ public class GeodesicDistanceTransformFloat extends AlgoStub implements
 	// ==================================================
 	// Constructors 
 	
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 */
 	public GeodesicDistanceTransformFloat(ChamferMask2D mask)
 	{
 		this.mask = mask;
 	}
 
-	@Deprecated
-	public GeodesicDistanceTransformFloat(float[] weights)
-	{
-		this.mask = ChamferMask2D.fromWeights(weights);
-	}
-
+	/**
+	 * Creates a new algorithm for propagating geodesic distances.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 */
 	public GeodesicDistanceTransformFloat(ChamferMask2D mask, boolean normalizeMap)
 	{
 		this.mask = mask;
 		this.normalizeMap = normalizeMap;
 	}
 
+	/**
+	 * Creates a new algorithm.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 */
+	@Deprecated
+	public GeodesicDistanceTransformFloat(float[] weights)
+	{
+		this.mask = ChamferMask2D.fromWeights(weights);
+	}
+
+	/**
+	 * Creates a new algorithm.
+	 * 
+	 * @param weights
+	 *            the weights to use for propagating distances
+	 * @param normalizeMap
+	 *            the flag for normalization
+	 */
 	@Deprecated
 	public GeodesicDistanceTransformFloat(float[] weights, boolean normalizeMap)
 	{
@@ -244,7 +289,7 @@ public class GeodesicDistanceTransformFloat extends AlgoStub implements
 					}
 				}
 				
-				if (newDist < currentDist) 
+				if (newDist < currentDist)
 				{
 					distMap.setf(x, y, (float) newDist);
 					modif = true;
@@ -320,14 +365,12 @@ public class GeodesicDistanceTransformFloat extends AlgoStub implements
 		int sizeY = distMap.getHeight();
 
 		// retrieve the minimum weight
-		double w0 = Double.POSITIVE_INFINITY;
-		for (FloatOffset offset : this.mask.getFloatOffsets())
-		{
-			w0 = Math.min(w0, offset.weight);
-		}
+		double w0 = this.mask.getNormalizationWeight();
 		
+		 // iterate over pixels within map to normalize values
 		for (int y = 0; y < sizeY; y++)
 		{
+			this.fireProgressChanged(this, y, sizeY);
 			for (int x = 0; x < sizeX; x++)
 			{
 				if (((int) labelImage.getf(x, y)) == 0)
@@ -342,5 +385,6 @@ public class GeodesicDistanceTransformFloat extends AlgoStub implements
 				}
 			}
 		}
+		this.fireProgressChanged(this, 1, 1);
 	}
 }

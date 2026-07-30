@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -102,6 +102,32 @@ public class IJUtils
 		return status;
 	}
 	
+	/**
+     * Return an array of String containing the name of all the currently open
+     * images. If no image is open, returns an array with zero element.
+     * 
+     * @return an array of string containing the name of open images.
+     */
+    public static final String[] getOpenImageNames()
+    {
+        // retrieve list of image ID's
+        int[] indices = WindowManager.getIDList();
+        if (indices == null)
+        {
+            return new String[0];
+        }
+
+        // convert to a list of image names
+        String[] imageNames = new String[indices.length];
+        for (int i = 0; i < indices.length; i++)
+        {
+            imageNames[i] = WindowManager.getImage(indices[i]).getTitle();
+        }
+
+        // return image names
+        return imageNames;
+    }
+	
     /**
      * Iterates on the list of TextWindows, and keeps only the ones containing a
      * non-null ResultsTable
@@ -128,6 +154,25 @@ public class IJUtils
         
         return windows.toArray(new TextWindow[0]);
     }
+    
+    /**
+     * Returns the names of the windows provided in input array of TextWindow
+     * instances.
+     * 
+     * @param textWindows
+     *            an array of TextWindow
+     * @return a String array the same size as input array containing the name
+     *         of each window
+     */
+    public static final String[] getWindowNames(TextWindow[] textWindows)
+    {
+        String[] names = new String[textWindows.length];
+        for (int i = 0; i < textWindows.length; i++)
+        {
+            names[i] = textWindows[i].getTitle();
+        }
+        return names;
+    }
 
     /**
      * Extracts a list of integer labels from a string representation.
@@ -153,8 +198,11 @@ public class IJUtils
      * Prints the content of the given ImageProcessor on the console. This can be used
      * for debugging (small) images.
      * 
-     * @param image the image to display on the console 
+     * @param image the image to display on the console
+     * 
+     * @deprecated use {@link inra.ijpb.data.image.ImageUtils#print(ImageProcessor)} instead
      */
+    @Deprecated
     public static final void printImage(ImageProcessor image) 
     {
         for (int y = 0; y < image.getHeight(); y++)

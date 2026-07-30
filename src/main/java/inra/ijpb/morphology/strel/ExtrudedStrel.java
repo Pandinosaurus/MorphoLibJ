@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -38,6 +38,15 @@ public class ExtrudedStrel extends AbstractStrel3D
 	int sizeZ;
 	int offsetZ;
 	
+	/**
+	 * Creates a 3D structuring element by extruding ("repeating") a 2D
+	 * structuring element along the given number of slices.
+	 * 
+	 * @param strel2d
+	 *            the 2D structuring to repeat
+	 * @param nSlices
+	 *            the number of slices for replication
+	 */
 	public ExtrudedStrel(Strel strel2d, int nSlices)
 	{
 		this.strel2d = strel2d;
@@ -50,6 +59,17 @@ public class ExtrudedStrel extends AbstractStrel3D
 	}
 	
 	
+	/**
+	 * Creates a 3D structuring element by extruding ("repeating") a 2D
+	 * structuring element along the given number of slices.
+	 * 
+	 * @param strel2d
+	 *            the 2D structuring to repeat
+	 * @param nSlices
+	 *            the number of slices for replication
+	 * @param offset
+	 *            the offset along the Z-axis for the new strel
+	 */
 	public ExtrudedStrel(Strel strel2d, int nSlices, int offset)
 	{
 		this.strel2d = strel2d;

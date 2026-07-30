@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -57,6 +57,18 @@ public class EllipsoidStrel extends AbstractStrel3D
 		return new EllipsoidStrel(radius);
 	}
 	
+	/**
+	 * Creates a structuring element with an ellipsoidal shape from a list of
+	 * three radius.
+	 * 
+	 * @param radiusX
+	 *            the radius along the X-axis
+	 * @param radiusY
+	 *            the radius along the Y-axis
+	 * @param radiusZ
+	 *            the radius along the Z-axis
+	 * @return a new structuring element with ellipsoid shape
+	 */
 	public final static EllipsoidStrel fromRadiusList(double radiusX, double radiusY, double radiusZ)
 	{
 		return new EllipsoidStrel(radiusX, radiusY, radiusZ);
@@ -74,6 +86,18 @@ public class EllipsoidStrel extends AbstractStrel3D
 		return new EllipsoidStrel((diam - 1.0) / 2);
 	}
 	
+	/**
+	 * Creates a structuring element with an ellipsoidal shape from a list of
+	 * three diameters.
+	 * 
+	 * @param diamX
+	 *            the diameter along the X-axis
+	 * @param diamY
+	 *            the diameter along the Y-axis
+	 * @param diamZ
+	 *            the diameter along the Z-axis
+	 * @return a new structuring element with ellipsoid shape
+	 */
 	public final static EllipsoidStrel fromDiameterList(double diamX, double diamY, double diamZ)
 	{
 		double radiusX = (diamX - 1) / 2;
@@ -95,6 +119,17 @@ public class EllipsoidStrel extends AbstractStrel3D
 		this.zRadius = radius;
 	}
 
+	/**
+	 * Constructor for a structuring element with an ellipsoidal shape from a list of
+	 * three radius.
+	 * 
+	 * @param radiusX
+	 *            the radius along the X-axis
+	 * @param radiusY
+	 *            the radius along the Y-axis
+	 * @param radiusZ
+	 *            the radius along the Z-axis
+	 */
 	private EllipsoidStrel(double xRadius, double yRadius, double zRadius) 
 	{
 		this.xRadius = xRadius;
@@ -143,12 +178,14 @@ public class EllipsoidStrel extends AbstractStrel3D
 		return mask;
 	}
 
-	@Override
-	public int[] getOffset()
-	{
-		int intRadius = (int) Math.round(xRadius);
-		return new int[]{intRadius, intRadius, intRadius};
-	}
+    @Override
+    public int[] getOffset()
+    {
+        int intRadiusX = (int) Math.round(xRadius);
+        int intRadiusY = (int) Math.round(yRadius);
+        int intRadiusZ = (int) Math.round(zRadius);
+        return new int[] { intRadiusX, intRadiusY, intRadiusZ };
+    }
 
 	@Override
 	public int[][] getShifts3D()

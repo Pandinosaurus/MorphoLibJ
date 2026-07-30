@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -46,16 +46,38 @@ import java.awt.Color;
 @Deprecated
 public enum CommonColors
 {
+	/** The white color (255,255,255). */
+	@Deprecated
 	WHITE("White", 		Color.WHITE), 
+	/** The black color (0,0,0).*/
+	@Deprecated
 	BLACK("Black", 		Color.BLACK), 
+	/** The red color */
+	@Deprecated
 	RED("Red", 			Color.RED), 
+	/** The green color */
+	@Deprecated
 	GREEN("Green", 		Color.GREEN), 
+	/** The blue color */
+	@Deprecated
 	BLUE("Blue", 		Color.BLUE), 
+	/** The cyan (light blue) color */
+	@Deprecated
 	CYAN("Cyan", 		Color.CYAN), 
+	/** The magenta color */
+	@Deprecated
 	MAGENTA("Magenta", 	Color.MAGENTA), 
+	/** The yellow color */
+	@Deprecated
 	YELLOW("Yellow", 	Color.YELLOW), 
+	/** The White color */
+	@Deprecated
 	GRAY("Gray", 		Color.GRAY), 
+	/** The dark gray color */
+	@Deprecated
 	DARK_GRAY("Dark Gray", 	 Color.DARK_GRAY), 
+	/** The light gray color */
+	@Deprecated
 	LIGHT_GRAY("Light Gray", Color.LIGHT_GRAY);
 
 	/** The name of the color, as displayed in a widget */
@@ -78,6 +100,7 @@ public enum CommonColors
 	/**
 	 * @return the label associated to this enumeration item
 	 */
+	@Deprecated
 	public String getLabel() 
 	{
 		return label;
@@ -86,6 +109,7 @@ public enum CommonColors
 	/**
 	 * @return the java color corresponding to this enumeration item
 	 */
+	@Deprecated
 	public Color getColor() 
 	{
 		return color;
@@ -94,11 +118,18 @@ public enum CommonColors
 	/**
 	 * @return a string representation of this enumeration item
 	 */
+	@Deprecated
 	public String toString() 
 	{
 		return label;
 	}
 	
+	/**
+	 * Returns all the labels for this enumeration.
+	 * 
+	 * @return all the labels for this enumeration.
+	 */
+	@Deprecated
 	public static String[] getAllLabels()
 	{
 		int n = CommonColors.values().length;
@@ -120,6 +151,7 @@ public enum CommonColors
 	 * @throws IllegalArgumentException
 	 *             if color name is not recognized.
 	 */
+	@Deprecated
 	public static CommonColors fromLabel(String label) 
 	{
 		if (label != null)

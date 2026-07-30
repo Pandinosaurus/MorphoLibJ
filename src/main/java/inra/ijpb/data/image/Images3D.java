@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -67,6 +67,8 @@ public class Images3D
 	/**
 	 * Checks if the two input 3D images have the same size in each direction.
 	 * 
+     * @deprecated replaced by ImageUtils.isSameSize(...)
+     * 
 	 * @param image1
 	 *            the first image
 	 * @param image2
@@ -74,6 +76,7 @@ public class Images3D
 	 * @return true if both images have same width, height and number of slices,
 	 *         and false otherwise.
 	 */
+	@Deprecated
 	public static final boolean isSameSize(ImageStack image1, ImageStack image2)
 	{
 		if (image1.getWidth() != image2.getWidth())
@@ -88,6 +91,8 @@ public class Images3D
 	/**
 	 * Checks if the two input 3D images have the same data type
 	 * 
+	 * @deprecated replaced by ImageUtils.isSameType(...)
+	 * 
 	 * @param image1
 	 *            the first image
 	 * @param image2
@@ -95,6 +100,7 @@ public class Images3D
 	 * @return true if both images have the same data type, given by the bit
 	 *         depth.
 	 */
+    @Deprecated
 	public static final boolean isSameType(ImageStack image1, ImageStack image2)
 	{
 		return image1.getBitDepth() == image2.getBitDepth();
@@ -192,6 +198,18 @@ public class Images3D
 		return result;
 	}
 	
+	/**
+	 * Replaces the elements of an image with a given value by a new values.
+	 * 
+	 * @deprecated replaced by {@link ImageUtils#replaceValue(ImagePlus, double, double)}
+	 * 
+	 * @param image
+	 *            the image to process
+	 * @param initialValue
+	 *            the value of the elements to replace
+	 * @param finalValue
+	 *            the new value of the elements
+	 */
 	public static final void replaceValue(ImagePlus image, double initialValue, double finalValue) 
 	{ 
 		if (image.getStackSize() == 1) 
@@ -230,9 +248,11 @@ public class Images3D
 	/**
 	 * Fills the input 3D image with the given value.
 	 * 
-	 * @param image the 3D image to process
-	 * @param value the value used to fill input image
-	 */ 
+	 * @param image
+	 *            the 3D image to process
+	 * @param value
+	 *            the value used to fill input image
+	 */
 	public static final void fill(ImageStack image, double value) 
 	{
 		for (int z = 0; z < image.getSize(); z++)
@@ -252,6 +272,8 @@ public class Images3D
 	 * for debugging (small) images.
 	 * 
 	 * @param image the 3D image to display on the console 
+	 * 
+	 * @deprecated replaced by {@link inra.ijpb.data.image.ImageUtils#print(ImageStack)}
 	 */
 	public static final void print(ImageStack image) 
 	{
@@ -270,7 +292,42 @@ public class Images3D
 		}
 	}
 	
-	/**
+    /**
+     * Computes the complements of the input image using the specified value as
+     * reference, and returns the complemented image.
+     *
+     * @param image
+     *            the image to complement
+     * @param base
+     *            the reference value for computing complement (ususally 255)
+     * @return the complemented image, with values equal to base value minus
+     *         values from original image.
+     */
+    public static final ImageStack complement(ImageStack image, double base)
+    {
+        int sizeX = image.getWidth();
+        int sizeY = image.getHeight();
+        int sizeZ = image.getSize();
+        ImageStack res = ImageStack.create(sizeX, sizeY, sizeZ, image.getBitDepth());
+
+        for (int z = 0; z < sizeZ; z++)
+        {
+            final ImageProcessor ip = image.getProcessor(z + 1);
+            final ImageProcessor ip2 = res.getProcessor(z + 1);
+            
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int x = 0; x < sizeX; x++)
+                {
+                    ip2.setf(x, y, (float) (base - ip.getf(x, y)));
+                }
+            }
+        }
+        
+        return res;
+    }
+
+    /**
 	 * Inverts the values of a 3D image
 	 *
 	 * @param image input image

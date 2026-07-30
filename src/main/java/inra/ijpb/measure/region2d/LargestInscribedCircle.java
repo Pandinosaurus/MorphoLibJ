@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -12,10 +33,13 @@ import ij.measure.ResultsTable;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.geometry.Circle2D;
+import inra.ijpb.label.LabelImages;
 
 /**
  * Computes the largest inscribed circle for each region of a label or binary
  * image.
+ * 
+ * @see inra.ijpb.measure.region3d.LargestInscribedBall
  * 
  * @author dlegland
  *
@@ -45,7 +69,10 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 	
 	// ==================================================
 	// Constructors
-	
+
+	/**
+	 * Default empty constructor.
+	 */
 	public LargestInscribedCircle()
 	{
 	}
@@ -102,12 +129,12 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 	 *         region, in calibrated coordinates
 	 */
 	public Circle2D[] analyzeRegions(ImageProcessor labelImage, int[] labels, Calibration calib)
-    {
-    	// compute max label within image
-    	int nLabels = labels.length;
-    	
+	{
+		// compute max label within image
+		int nLabels = labels.length;
+
 		// first distance propagation to find an arbitrary center
-    	fireStatusChanged(this, "Compute distance map");
+		fireStatusChanged(this, "Compute distance map");
 		ImageProcessor distanceMap = BinaryImages.distanceMap(labelImage);
 		
 		// Extract position of maxima
@@ -127,7 +154,7 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 		}
 
 		return circles;
-    }
+	}
 	
 	/**
 	 * Returns the set of values from input image for each specified position.
@@ -138,8 +165,7 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 	 *            the set of positions
 	 * @return the array of values corresponding to each position
 	 */
-	private final static float[] getValues(ImageProcessor image, 
-			Point[] positions) 
+	private final static float[] getValues(ImageProcessor image, Point[] positions)
 	{
 		// allocate memory
 		float[] values = new float[positions.length];
@@ -179,13 +205,8 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 			maxLabel = Math.max(maxLabel, labels[i]);
 		}
 		
-		// init index of each label
-		// to make correspondence between label value and label index
-		int[] labelIndex = new int[maxLabel+1];
-		for (int i = 0; i < nbLabel; i++)
-		{
-			labelIndex[labels[i]] = i;
-		}
+		// keep correspondences between label value and label index
+		Map<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
 		
 		// Init Position and value of maximum for each label
 		Point[] posMax 	= new Point[nbLabel];
@@ -207,11 +228,12 @@ public class LargestInscribedCircle extends RegionAnalyzer2D<Circle2D>
 			{
 				int label = (int) labelImage.getf(x, y);
 				
-				// do not process pixels that do not belong to particle
-				if (label==0)
-					continue;
-
-				index = labelIndex[label];
+				// do not process background pixels
+				if (label == 0) continue;
+				// process only specified labels
+				if (!labelIndices.containsKey(label)) continue;
+				
+				index = labelIndices.get(label);
 				
 				// update values and positions
 				value = image.get(x, y);

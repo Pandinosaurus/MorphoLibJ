@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -37,7 +37,7 @@ import inra.ijpb.binary.ChamferWeights;
  * @see inra.ijpb.binary.ChamferWeights3D
  * @see inra.ijpb.label.distmap.LabelDilation3D4WShort
  * 
- * @deprecated replaced by LabelDilation2DShort (since 1.4.4)
+ * @deprecated replaced by LabelDilation2DShort (since 1.5.0)
  * 
  */
 @Deprecated
@@ -46,17 +46,30 @@ public class LabelDilationShort5x5 extends AlgoStub
 	// ==================================================
 	// Class variables
 	
+	@Deprecated
 	short[] weights = new short[]{5, 7, 11};
 
 	
 	// ==================================================
 	// Constructors 
 	
+	/**
+	 * Creates a new LabelDilation operator.
+	 * 
+	 * @param weights the weights to use for dilation
+	 */
+	@Deprecated
 	public LabelDilationShort5x5(ChamferWeights weights) 
 	{
 		this(weights.getShortWeights());
 	}
 
+	/**
+	 * Creates a new LabelDilation operator.
+	 * 
+	 * @param weights the weights to use for dilation
+	 */
+	@Deprecated
 	public LabelDilationShort5x5(short[] weights) 
 	{
 		this.weights = weights;
@@ -90,6 +103,7 @@ public class LabelDilationShort5x5 extends AlgoStub
 	 * @return a new label image where each label is dilated over background
 	 *         pixels.
 	 */
+	@Deprecated
 	public ImageProcessor process(ImageProcessor labelImage, double distMax)
 	{
 		// use max distance relative to chamfer weights

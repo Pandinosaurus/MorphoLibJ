@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -60,8 +60,18 @@ public interface BorderManager3D
 	 */
 	public enum Type
 	{
-		REPLICATED("Replicate"), PERIODIC("Periodic"), MIRRORED("Mirrored"), BLACK(
-				"Black"), WHITE("White"), GRAY("Gray");
+		/** replicates nearest pixel to populate border */
+		REPLICATED("Replicate"),
+		/** uses periodic boundary to populate border */
+		PERIODIC("Periodic"),
+		/** uses mirrored image to populate border */
+		MIRRORED("Mirrored"),
+		/** uses black value (0) to fill border */
+		BLACK("Black"),
+		/** uses white value (255) to fill border */
+		WHITE("White"),
+		/** uses gray value (127) to fill border */
+		GRAY("Gray");
 
 		private Type(String label)
 		{
@@ -75,12 +85,22 @@ public interface BorderManager3D
 			return this.label;
 		}
 
+		/**
+		 * @return the label used to identify this border manager
+		 */
 		public String getLabel()
 		{
 			return this.label;
 		}
 
-	public BorderManager3D createBorderManager(ImageStack image)
+		/**
+		 * Creates a new Border Manager for the input image.
+		 * 
+		 * @param image
+		 *            the image to wrap
+		 * @return a new instance of BorderManager3D
+		 */
+		public BorderManager3D createBorderManager(ImageStack image)
 		{
 			switch ((Type) this)
 			{
@@ -105,7 +125,10 @@ public interface BorderManager3D
 			}
 		}
 
-		public static String[] getAllLabels()
+	/**
+	 * @return all the labels used for identifying this enumeration.
+	 */
+	public static String[] getAllLabels()
 		{
 			int n = Type.values().length;
 			String[] result = new String[n];
@@ -141,14 +164,65 @@ public interface BorderManager3D
 		}
 	}
 
+    /**
+     * Adds the specified number of voxels around the input image, and returns
+     * the resulting image. 
+     * 
+     * @param image
+     *            the input image stack 
+     * @param left
+     *            the number of voxels to add to the left
+     * @param right
+     *            the number of voxels to add to the right
+     * @param top
+     *            the number of voxels to add on top of the stack
+     * @param bottom
+     *            the number of voxels to add at the bottom of the stack
+     * @param front
+     *            the number of slices to add in front of the stack
+     * @param back
+     *            the number of slices to add behind the stack
+     * @return a new image with extended borders
+     */
+    public default ImageStack addBorders(ImageStack image, 
+            int left, int right, int top, int bottom, int front, int back)
+    {
+        // get image dimensions
+        int width = image.getWidth(); 
+        int height = image.getHeight(); 
+        int depth = image.getSize(); 
+        
+        // compute result dimensions
+        int width2 = width + left + right;
+        int height2 = height + top + bottom;
+        int depth2 = depth + front + back;
+        ImageStack result = ImageStack.create(width2, height2, depth2, image.getBitDepth());
+        
+        // fill result image
+        for (int z = 0; z < depth2; z++)
+        {
+            for (int y = 0; y < height2; y++)
+            {
+                for (int x = 0; x < width2; x++)
+                {
+                    result.setVoxel(x, y, z, this.get(x - left, y - top, z - front));
+                }
+            }
+        }
+        return result;
+    }
+    
 	/**
-	 * Returns the value corresponding to (x,y) position. Position can be
-	 * outside original image bounds.
-	 *   
-	 * @param x column index of the position
-	 * @param y row index of the position
-	 * @param z slice index of the position
-	 * @return border corrected value
-	 */
+     * Returns the value corresponding to (x,y) position. Position can be
+     * outside original image bounds.
+     * 
+     * @param x
+     *            column index of the position
+     * @param y
+     *            row index of the position
+     * @param z
+     *            slice index of the position
+     * @return border corrected value
+     */
 	public int get(int x, int y, int z);
 }

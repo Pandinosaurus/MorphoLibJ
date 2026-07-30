@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,5 +32,14 @@ import inra.ijpb.algo.Algo;
  */
 public interface AreaOpening extends Algo
 {
+	/**
+	 * Applies area opening on the input grayscale image and returns the result.
+	 * 
+	 * @param image
+	 *            the image to process.
+	 * @param minArea
+	 *            the minimal number of pixels the regions need to keep.
+	 * @return the result of area opening.
+	 */
 	public ImageProcessor process(ImageProcessor image, int minArea);
 }

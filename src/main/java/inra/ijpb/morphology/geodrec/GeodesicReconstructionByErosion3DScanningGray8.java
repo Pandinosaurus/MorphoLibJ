@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -24,8 +24,7 @@ package inra.ijpb.morphology.geodrec;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import ij.ImageStack;
-import inra.ijpb.data.image.Images3D;
-
+import inra.ijpb.data.image.ImageUtils;
 
 /**
  * Geodesic reconstruction by erosion for 3D stacks of byte processors, using
@@ -98,7 +97,7 @@ public class GeodesicReconstructionByErosion3DScanningGray8 extends GeodesicReco
 		this.sizeX 	= marker.getWidth();
 		this.sizeY 	= marker.getHeight();
 		this.sizeZ 	= marker.getSize();
-		if (!Images3D.isSameSize(marker, mask)) 
+		if (!ImageUtils.isSameSize(marker, mask))
 		{
 			throw new IllegalArgumentException("Marker and Mask images must have the same size");
 		}
@@ -706,7 +705,7 @@ public class GeodesicReconstructionByErosion3DScanningGray8 extends GeodesicReco
 		this.sizeX 	= marker.getWidth();
 		this.sizeY 	= marker.getHeight();
 		this.sizeZ 	= marker.getSize();
-		if (!Images3D.isSameSize(marker, mask)) 
+		if (!ImageUtils.isSameSize(marker, mask))
 		{
 			throw new IllegalArgumentException("Marker and Mask images must have the same size");
 		}

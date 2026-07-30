@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -31,6 +31,9 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import inra.ijpb.measure.IntrinsicVolumes2D;
 
+/**
+ * Plugin for quantifying microstructures from binary or label images. 
+ */
 public class MicrostructureAnalysisPlugin implements PlugInFilter {
 
     // ====================================================

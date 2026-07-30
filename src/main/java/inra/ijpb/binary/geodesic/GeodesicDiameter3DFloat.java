@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -47,12 +47,15 @@ import inra.ijpb.label.LabelImages;
  *	table.show("Geodesic Diameter 3D");
  *}</pre>
  *
- * @see GeodesicDiameterFloat
+ * @deprecated replaced by inra.ijpb.measure.region3d.GeodesicDiameter3D
+ * 
+ * @see inra.ijpb.measure.region3d.GeodesicDiameter3D
  * @see inra.ijpb.binary.ChamferWeights3D
  * 
  * @author dlegland
  *
  */
+@Deprecated
 public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiameter3D, AlgoListener
 {
 	// ==================================================
@@ -61,11 +64,13 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	/**
 	 * The chamfer mask used to propagate distances to neighbor pixels.
 	 */
+	@Deprecated
 	ChamferMask3D chamferMask;
 
 	/**
 	 * The string used for indicating the current step in algo events.
 	 */
+	@Deprecated
 	String currentStep = "";
 	
 	
@@ -79,6 +84,7 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	 *            an instance of ChamferMask3D, which provides the float values
 	 *            used for propagating distances
 	 */
+	@Deprecated
 	public GeodesicDiameter3DFloat(ChamferMask3D chamferMask)
 	{
 		this.chamferMask = chamferMask;
@@ -106,6 +112,7 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	 *            the array of weights for orthogonal, diagonal, and eventually
 	 *            chess-knight moves neighbors
 	 */
+	@Deprecated
 	public GeodesicDiameter3DFloat(float[] weights)
 	{
 		if (weights.length < 3)
@@ -129,6 +136,7 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	 * @return a ResultsTable containing for each label the geodesic diameter of
 	 *         the corresponding particle
 	 */
+	@Deprecated
 	public ResultsTable process(ImageStack labelImage)
 	{
 		// Check validity of parameters
@@ -410,12 +418,14 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	// Implementation of AlgoListener interface 
 	
 	@Override
+	@Deprecated
 	public void algoProgressChanged(AlgoEvent evt) 
 	{
 		fireProgressChanged(new Event(this, evt));
 	}
 
 	@Override
+	@Deprecated
 	public void algoStatusChanged(AlgoEvent evt) 
 	{
 		evt = new Event(this, evt);
@@ -425,8 +435,10 @@ public class GeodesicDiameter3DFloat extends AlgoStub implements GeodesicDiamete
 	/**
 	 * Encapsulation class to add a semantic layer on the interpretation of the event.
 	 */
+	@Deprecated
 	class Event extends AlgoEvent
 	{
+		@Deprecated
 		public Event(GeodesicDiameter3DFloat source, AlgoEvent evt)
 		{
 			super(source, "(GeodDiam3d) " + evt.getStatus(), evt.getCurrentProgress(), evt.getTotalProgress());

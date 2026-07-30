@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -46,7 +46,13 @@ public class Watershed3DPlugin implements PlugIn
 	/** flag to use 26-connectivity */
 	public static boolean use26neighbors = true;
 	
+	/**
+	 * the minimum value for dynamic
+	 */
 	public static double hMin = 0;
+	/**
+	 * the maximum value for dynamic
+	 */
 	public static double hMax = 255;
 	
 		

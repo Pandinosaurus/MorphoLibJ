@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -16,22 +37,15 @@ import inra.ijpb.label.LabelImages;
  * Utility functions for computing position of boundary points/corners of
  * regions within binary or label images.
  * 
- * The methods in this can are mostly used for computing convex hulls.
+ * The methods in this class are mostly used for computing convex hulls.
  * 
- * @see inra.ijpb.measures.region2d.Convexity
+ * @see inra.ijpb.measure.region2d.Convexity
  * 
  * @author dlegland
  *
  */
 public class RegionBoundaries
 {
-	/**
-	 * private constructor to prevent instantiations.
-	 */
-	private RegionBoundaries()
-	{
-	}
-
 	/**
      * Returns a set of points located at the corners of a binary particle.
      * Point coordinates are integer (ImageJ locates pixels in a [0 1]^d area).
@@ -132,7 +146,7 @@ public class RegionBoundaries
 	 * Returns a set of points located at the corners of each region.
 	 * Point coordinates are integer (ImageJ locates pixels in a [0 1]^2 area).
 	 * 
-     * @see #runLengthsCorners(ImageProcessor, int[])
+     * @see #runlengthsCorners(ImageProcessor, int[])
      * 
 	 * @param image
 	 *            a binary image representing the particle
@@ -223,11 +237,13 @@ public class RegionBoundaries
      * 
      * The boundaries extracted by this methods have following coordinates:
      * <ul>
-     * <li><it>(x+0.5, y)</it>: top boundary</li>
-     * <li><it>(x , y+0.5)</it>: left boundary</li>
-     * <li><it>(x+1 , y+0.5)</it>: right boundary</li>
-     * <li><it>(x+0.5, y+1)</it>: bottom boundary</li>
+     * <li><i>(x+0.5, y)</i>: top boundary</li>
+     * <li><i>(x , y+0.5)</i>: left boundary</li>
+     * <li><i>(x+1 , y+0.5)</i>: right boundary</li>
+     * <li><i>(x+0.5, y+1)</i>: bottom boundary</li>
      * </ul>
+     * 
+     * Method used for computation of convexity.
      * 
      * @param binaryImage
      *            the image processor containing the binary region
@@ -283,11 +299,13 @@ public class RegionBoundaries
      * 
      * The boundaries extracted by this methods have following coordinates:
      * <ul>
-     * <li><it>(x+0.5, y)</it>: top boundary</li>
-     * <li><it>(x , y+0.5)</it>: left boundary</li>
-     * <li><it>(x+1 , y+0.5)</it>: right boundary</li>
-     * <li><it>(x+0.5, y+1)</it>: bottom boundary</li>
+     * <li><i>(x+0.5, y)</i>: top boundary</li>
+     * <li><i>(x , y+0.5)</i>: left boundary</li>
+     * <li><i>(x+1 , y+0.5)</i>: right boundary</li>
+     * <li><i>(x+0.5, y+1)</i>: bottom boundary</li>
      * </ul>
+     * 
+     * Method used for computation of convexity.
      * 
      * @param labelImage
      *            the image processor containing the region labels
@@ -370,5 +388,12 @@ public class RegionBoundaries
         }
 
         return pointArrays;
+    }
+
+    /**
+     * private constructor to prevent instantiations.
+     */
+    private RegionBoundaries()
+    {
     }
 }

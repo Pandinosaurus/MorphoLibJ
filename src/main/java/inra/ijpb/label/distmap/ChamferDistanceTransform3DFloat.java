@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -21,6 +42,8 @@ import inra.ijpb.data.image.Images3D;
  * different compared to the version for binary images, in particular, it makes
  * use of the "Image3D" interface.
  * 
+ * @see inra.ijpb.binary.distmap.ChamferDistanceTransform3DFloat
+ * 
  * @author David Legland
  * 
  */
@@ -30,7 +53,7 @@ public class ChamferDistanceTransform3DFloat extends AlgoStub implements Distanc
 	// Class variables
 
 	/**
-	 * The chamfer weights used to propagate distances to neighbor voxels.
+	 * The chamfer mask used to propagate distances to neighbor voxels.
 	 */
 	ChamferMask3D chamferMask;
 	
@@ -45,14 +68,31 @@ public class ChamferDistanceTransform3DFloat extends AlgoStub implements Distanc
 	// ==================================================
 	// Constructors 
 	
-	public ChamferDistanceTransform3DFloat(ChamferMask3D chamferMask)
+	/**
+	 * Creates a new algorithm for computing 3D distance maps on label images
+	 * based on a chamfer mask. Use normalization of resulting distance map.
+	 * 
+	 * @param mask
+	 *            the chamfer mask used for propagating distances
+	 */
+	public ChamferDistanceTransform3DFloat(ChamferMask3D mask)
 	{
-		this.chamferMask = chamferMask;
+		this.chamferMask = mask;
 	}
 	
-	public ChamferDistanceTransform3DFloat(ChamferMask3D chamferMask, boolean normalize)
+	/**
+	 * Creates a new algorithm for computing 3D distance maps on label images
+	 * based on a chamfer mask.
+	 * 
+	 * @param mask
+	 *            the chamfer mask to use for propagating distances
+	 * @param normalize
+	 *            whether distance map should be normalized by the weight
+	 *            associated to orthogonal shifts
+	 */
+	public ChamferDistanceTransform3DFloat(ChamferMask3D mask, boolean normalize)
 	{
-		this.chamferMask = chamferMask;
+		this.chamferMask = mask;
 		this.normalize = normalize;
 	}
 	
@@ -186,7 +226,7 @@ public class ChamferDistanceTransform3DFloat extends AlgoStub implements Distanc
 						if (((int) labels.getValue(x2, y2, z2)) != label)
 						{
 							// Update with distance to nearest different label
-							newDist = offset.weight;
+							newDist = Math.min(newDist, offset.weight);
 						}
 						else
 						{
@@ -255,7 +295,7 @@ public class ChamferDistanceTransform3DFloat extends AlgoStub implements Distanc
 						if (((int) labels.getValue(x2, y2, z2)) != label)
 						{
 							// Update with distance to nearest different label
-							newDist = offset.weight;
+							newDist = Math.min(newDist, offset.weight);
 						}
 						else
 						{

@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -23,6 +44,17 @@ public class BinaryConfigurationsHistogram3D extends AlgoStub
     // ==================================================
     // Static methods
 
+	/**
+	 * Applies look-up-table of values for each configuration, based on the
+	 * array of count for each binary configuration.
+	 * 
+	 * @param histogram
+	 *            the count of each type of 2-by-2-by-2 binary configurations,
+	 *            as a 256 array
+	 * @param lut
+	 *            the value to associate to each configuration
+	 * @return the sum of the products of counts by the associated value
+	 */
     public static final double applyLut(int[] histogram, double[] lut)
     {
         double sum = 0;
@@ -33,6 +65,17 @@ public class BinaryConfigurationsHistogram3D extends AlgoStub
         return sum;
     }
 
+	/**
+	 * Applies look-up-table of values for each configuration of each region,
+	 * based on the array of count for each binary configuration.
+	 * 
+	 * @param histograms
+	 *            the count of each type of 2-by-2-by-2 binary configurations,
+	 *            as a 256 array
+	 * @param lut
+	 *            the value to associate to each configuration
+	 * @return the sum of the products of counts by the associated value
+	 */
     public static final double[] applyLut(int[][] histograms, double[] lut)
     {
         double[] sums = new double[histograms.length];
@@ -145,11 +188,13 @@ public class BinaryConfigurationsHistogram3D extends AlgoStub
 
     /**
      * Applies a look-up-table for each of the 2x2x2 voxel configurations
-     * containing at least one voxel of the input binary image, and returns the
+     * with all voxels within the input binary image, and returns the
      * sum of contributions for each label.
      * 
      * This method is used for computing densities of Euler number, surface area
      * and mean breadth from binary images.
+     * 
+     * @see #process(ImageStack)
      * 
      * @param image
      *            the input 3D binary image
@@ -242,12 +287,12 @@ public class BinaryConfigurationsHistogram3D extends AlgoStub
      * 
      * This method is used for computing Euler number and surface area.
      * 
+     * @see #processInnerFrame(ImageStack)
+     * 
      * @param image
      *            the input 3D image of labels
      * @param labels
      *            the set of labels to process
-     * @param image
-     *            the input 3D binary image
      * @return an array of nLabels-by-256 integers containing the number of
      *         binary configurations for each label
      */

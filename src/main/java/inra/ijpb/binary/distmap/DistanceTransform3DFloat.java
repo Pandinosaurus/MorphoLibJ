@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,7 +32,7 @@ import inra.ijpb.data.image.Images3D;
  * Computes Chamfer distances in a 3x3x3 neighborhood using floating point 
  * calculation.
  * 
- * @deprecated replaced by ChamferDistanceTransform3DFloat (since 1.4.4)
+ * @deprecated replaced by ChamferDistanceTransform3DFloat (since 1.5.0)
  *  
  * @author David Legland
  * 
@@ -78,6 +78,7 @@ public class DistanceTransform3DFloat extends AlgoStub implements DistanceTransf
 	 * @param weights
 	 *            an array of two weights for orthogonal and diagonal directions
 	 */
+	@Deprecated
 	public DistanceTransform3DFloat(ChamferWeights3D weights)
 	{
 		this(weights.getFloatWeights());
@@ -89,6 +90,7 @@ public class DistanceTransform3DFloat extends AlgoStub implements DistanceTransf
 	 * @param weights
 	 *            an array of two weights for orthogonal and diagonal directions
 	 */
+	@Deprecated
 	public DistanceTransform3DFloat(float[] weights)
 	{
 		this.weights = weights;
@@ -104,6 +106,7 @@ public class DistanceTransform3DFloat extends AlgoStub implements DistanceTransf
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3DFloat(ChamferWeights3D weights, boolean normalize)
 	{
 		this(weights.getFloatWeights(), normalize);
@@ -119,6 +122,7 @@ public class DistanceTransform3DFloat extends AlgoStub implements DistanceTransf
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform3DFloat(float[] weights, boolean normalize)
 	{
 		this.weights = weights;
@@ -142,6 +146,7 @@ public class DistanceTransform3DFloat extends AlgoStub implements DistanceTransf
 	 *         <li>the distance to the nearest background pixel otherwise</li>
 	 *         </ul>
 	 */
+	@Deprecated
 	public ImageStack distanceMap(ImageStack image) 
 	{
 		// size of image

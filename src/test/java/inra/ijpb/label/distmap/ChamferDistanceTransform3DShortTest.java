@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -16,12 +37,11 @@ import inra.ijpb.binary.distmap.ChamferMask3D;
  */
 public class ChamferDistanceTransform3DShortTest
 {
-
 	/**
 	 * Test method for {@link inra.ijpb.label.distmap.ChamferDistanceTransform3DShort#distanceMap(ij.ImageStack)}.
 	 */
 	@Test
-	public void testDistanceMap()
+	public void test_distanceMap_Borgefors()
 	{
 		// create 3D image containing a cube 
 		ImageStack image = ImageStack.create(20, 20, 20, 8);
@@ -42,13 +62,82 @@ public class ChamferDistanceTransform3DShortTest
 		ImageStack result = algo.distanceMap(image);
 		assertEquals(16, result.getBitDepth());
 		
-//		System.out.println("result:");
-//		for (int x = 0; x < 100; x++)
-//		{
-//			System.out.print(((int)result.getVoxel(x, 50, 50)) + " ");
-//		}
 		double middle = result.getVoxel(10, 10, 10);
 		assertEquals(9, middle, .1);
+	}
+
+	/**
+	 * Test method for {@link inra.ijpb.label.distmap.ChamferDistanceTransform3DShort#distanceMap(ij.ImageStack)}.
+	 */
+	@Test
+	public void test_distanceMap_Svensson_sameAsBorgefors()
+	{
+		// create 3D image containing a cube 
+		ImageStack image = TestImages.createStack_eightCuboids();
+		
+		ChamferMask3D mask0 = ChamferMask3D.BORGEFORS;
+		DistanceTransform3D refAlgo = new ChamferDistanceTransform3DShort(mask0, true);
+		ImageStack ref = refAlgo.distanceMap(image);
+		
+		ChamferMask3D mask = ChamferMask3D.SVENSSON_3_4_5_7;
+		DistanceTransform3D algo = new ChamferDistanceTransform3DShort(mask, true);
+		
+		ImageStack result = algo.distanceMap(image);
+		
+		assertEquals(16, result.getBitDepth());
+		assertEquals(image.getWidth(), result.getWidth());
+		assertEquals(image.getHeight(), result.getHeight());
+		assertEquals(image.getSize(), result.getSize());
+
+		for (int z = 0; z < result.getSize(); z++)
+		{
+			for (int y = 0; y < result.getHeight(); y++)
+			{
+				for (int x = 0; x < result.getWidth(); x++)
+				{
+					double refValue = ref.getVoxel(x, y, z);
+					double value = result.getVoxel(x, y, z);
+					assertEquals(refValue, value, 0.01);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Test method for {@link inra.ijpb.label.distmap.ChamferDistanceTransform3DShort#distanceMap(ij.ImageStack)}.
+	 */
+	@Test
+	public void test_distanceMap_Svensson_adjacentCubes_sameAsBorgefors()
+	{
+		// create 3D image containing a cube 
+		ImageStack image = TestImages.createStack_eightAdjacentCubes();
+		
+		ChamferMask3D mask0 = ChamferMask3D.BORGEFORS;
+		DistanceTransform3D refAlgo = new ChamferDistanceTransform3DShort(mask0, true);
+		ImageStack ref = refAlgo.distanceMap(image);
+		
+		ChamferMask3D mask = ChamferMask3D.SVENSSON_3_4_5_7;
+		DistanceTransform3D algo = new ChamferDistanceTransform3DShort(mask, true);
+		
+		ImageStack result = algo.distanceMap(image);
+		
+		assertEquals(16, result.getBitDepth());
+		assertEquals(image.getWidth(), result.getWidth());
+		assertEquals(image.getHeight(), result.getHeight());
+		assertEquals(image.getSize(), result.getSize());
+
+		for (int z = 0; z < result.getSize(); z++)
+		{
+			for (int y = 0; y < result.getHeight(); y++)
+			{
+				for (int x = 0; x < result.getWidth(); x++)
+				{
+					double refValue = ref.getVoxel(x, y, z);
+					double value = result.getVoxel(x, y, z);
+					assertEquals(refValue, value, 0.01);
+				}
+			}
+		}
 	}
 
 	@Test
@@ -141,5 +230,4 @@ public class ChamferDistanceTransform3DShortTest
 		assertEquals(1, result.getVoxel(3, 4, 4), .1);
 		assertEquals(1, result.getVoxel(4, 4, 4), .1);
 	}
-
 }

@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,14 +32,78 @@ import org.junit.Test;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.measure.Calibration;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.color.ColorMaps.CommonLabelMaps;
+import inra.ijpb.data.image.ImageUtils;
 
 public class LabelImagesTest
 {
+    @Test
+    public final void test_cropLabel_ImagePlus2D()
+    {
+        // create a byte processor containing four labels
+        ImageProcessor image = new ByteProcessor(10, 10);
+        for (int y = 0; y < 3; y++)
+        {
+            for (int x = 0; x < 3; x++)
+            {
+                image.set(x + 1, y + 1, 1);
+                image.set(x + 5, y + 1, 2);
+                image.set(x + 1, y + 5, 3);
+                image.set(x + 5, y + 5, 4);
+            }
+        }
+        ImagePlus imagePlus = new ImagePlus("image", image);
+        
+        ImagePlus cropPlus = LabelImages.cropLabel(imagePlus, 4, 1);
+
+        assertEquals(5, cropPlus.getWidth());
+        assertEquals(5, cropPlus.getHeight());
+
+        Calibration calib = cropPlus.getCalibration();
+        assertEquals(4, calib.xOrigin, 0.01);
+        assertEquals(4, calib.yOrigin, 0.01);
+    }
+    
+    @Test
+    public final void test_cropLabel_ImagePlus3D()
+    {
+        // create a byte processor containing four labels
+        ImageStack image = ImageStack.create(8, 8, 8, 8);
+        for (int z = 0; z < 3; z++)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    image.setVoxel(x + 1, y + 1, z + 1, 1);
+                    image.setVoxel(x + 5, y + 1, z + 1, 2);
+                    image.setVoxel(x + 1, y + 5, z + 1, 3);
+                    image.setVoxel(x + 5, y + 5, z + 1, 4);
+                    image.setVoxel(x + 1, y + 1, z + 5, 5);
+                    image.setVoxel(x + 5, y + 1, z + 5, 6);
+                    image.setVoxel(x + 1, y + 5, z + 5, 7);
+                    image.setVoxel(x + 5, y + 5, z + 5, 8);
+                }
+            }
+        }
+        ImagePlus imagePlus = new ImagePlus("image", image);
+        
+        ImagePlus cropPlus = LabelImages.cropLabel(imagePlus, 8, 1);
+        assertEquals(5, cropPlus.getWidth());
+        assertEquals(5, cropPlus.getHeight());
+        assertEquals(5, cropPlus.getImageStackSize());
+        
+        Calibration calib = cropPlus.getCalibration();
+        assertEquals(4, calib.xOrigin, 0.01);
+        assertEquals(4, calib.yOrigin, 0.01);
+        assertEquals(4, calib.zOrigin, 0.01);
+    }
+    
 	@Test
 	public final void testLabelToRGB_ImageProcessorByteArrayColor()
 	{
@@ -318,6 +382,53 @@ public class LabelImagesTest
 		assertEquals(8, res.get(7, 7));
 	}
 
+    @Test
+    public final void testApplyLut_2D()
+    {
+        ImageProcessor labelMap = new ByteProcessor(12, 10);
+        ImageUtils.fillRect(labelMap, 1, 1, 4, 3, 2);
+        ImageUtils.fillRect(labelMap, 6, 1, 4, 3, 3);
+        ImageUtils.fillRect(labelMap, 1, 5, 4, 3, 6);
+        ImageUtils.fillRect(labelMap, 6, 5, 4, 3, 7);
+        double[] values = new double[] {2.3, 4.5, 6.7, 8.9};
+        
+        ImageProcessor res = LabelImages.applyLut(labelMap, values);
+        
+        // check result size
+        assertEquals(12, res.getWidth());
+        assertEquals(10, res.getHeight());
+        
+        // check propagation of labels
+        assertEquals(2.3, res.getf( 2, 2), 0.01);
+        assertEquals(4.5, res.getf( 7, 2), 0.01);
+        assertEquals(6.7, res.getf( 2, 6), 0.01);
+        assertEquals(8.9, res.getf( 7, 6), 0.01);
+    }
+    
+    @Test
+    public final void testApplyLut_3D()
+    {
+        ImageStack labelMap = ImageStack.create(12, 10, 8, 8);
+        ImageUtils.fillRect3d(labelMap, 1, 1, 2, 4, 3, 3, 2);
+        ImageUtils.fillRect3d(labelMap, 6, 1, 2, 4, 3, 3, 3);
+        ImageUtils.fillRect3d(labelMap, 1, 5, 2, 4, 3, 3, 6);
+        ImageUtils.fillRect3d(labelMap, 6, 5, 2, 4, 3, 3, 7);
+        double[] values = new double[] {2.3, 4.5, 6.7, 8.9};
+        
+        ImageStack res = LabelImages.applyLut(labelMap, values);
+        
+        // check result size
+        assertEquals(12, res.getWidth());
+        assertEquals(10, res.getHeight());
+        assertEquals(8, res.getSize());
+        
+        // check propagation of labels
+        assertEquals(2.3, res.getVoxel(2, 2, 2), 0.01);
+        assertEquals(4.5, res.getVoxel(7, 2, 2), 0.01);
+        assertEquals(6.7, res.getVoxel(2, 6, 2), 0.01);
+        assertEquals(8.9, res.getVoxel(7, 6, 2), 0.01);
+    }
+    
 	@Test
 	public final void testDilateLabels_SeparatedLabels()
 	{

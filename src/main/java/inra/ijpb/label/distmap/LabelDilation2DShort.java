@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -36,17 +36,21 @@ import inra.ijpb.binary.distmap.ChamferMask2D.ShortOffset;
  * Can be applied to label map encoded with 8 or 16 bits integers, or 32 bit
  * floats.
  * 
+ * @deprecated replaced by inra.ijpb.label.filter.ChamferLabelDilation2DShort
+ * 
  * @see inra.ijpb.binary.distmap.ChamferMask2D
  * @see inra.ijpb.label.distmap.LabelDilation3DShort
  * 
  * @author dlegland
  * 
  */
+@Deprecated
 public class LabelDilation2DShort extends AlgoStub 
 {
 	// ==================================================
 	// Class variables
 	
+	@Deprecated
 	ChamferMask2D mask;
 
 	
@@ -60,6 +64,7 @@ public class LabelDilation2DShort extends AlgoStub
 	 * @param mask
 	 *            the Chamfer mask to use.
 	 */
+	@Deprecated
 	public LabelDilation2DShort(ChamferMask2D mask) 
 	{
 		this.mask = mask;
@@ -84,6 +89,7 @@ public class LabelDilation2DShort extends AlgoStub
 	 * @return a new label image where each label is dilated over background
 	 *         pixels.
 	 */
+	@Deprecated
 	public ImageProcessor process(ImageProcessor labelImage, double distMax)
 	{
 		// use max distance relative to chamfer weights

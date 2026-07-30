@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -9,22 +30,27 @@ import java.util.TreeMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
+import inra.ijpb.algo.AlgoEvent;
+import inra.ijpb.algo.AlgoListener;
 import inra.ijpb.algo.AlgoStub;
 import inra.ijpb.label.LabelImages;
+import inra.ijpb.label.edit.FindAllLabels;
 import inra.ijpb.measure.RegionAnalyzer;
 
 /**
  * Base implementation of RegionAnalyzer interface for 3D binary/label
  * images.
  *
- * @param T
+ * @param <T>
  *            the type of the data computed for each region. May be a class
  *            instance, or a single Numeric type.
+ *
+ * @see inra.ijpb.measure.region2d.RegionAnalyzer2D
+ * 
  * @author dlegland
  *
  */
-public abstract class RegionAnalyzer3D<T> extends AlgoStub implements RegionAnalyzer<T>
+public abstract class RegionAnalyzer3D<T> extends AlgoStub implements RegionAnalyzer<T>, AlgoListener
 {
 	/**
      * Utility method that convert an array of result into a map using labels as
@@ -113,7 +139,9 @@ public abstract class RegionAnalyzer3D<T> extends AlgoStub implements RegionAnal
 	{
 		// extract particle labels
 		fireStatusChanged(this, "Find Labels");
-		int[] labels = LabelImages.findAllLabels(labelPlus);
+		FindAllLabels findLabels = new FindAllLabels();
+		findLabels.addAlgoListener(this);
+		int[] labels = findLabels.process(labelPlus);
 		
 		// compute analysis result for each label
 		fireStatusChanged(this, "Analyze regions");
@@ -127,18 +155,17 @@ public abstract class RegionAnalyzer3D<T> extends AlgoStub implements RegionAnal
 		fireStatusChanged(this, "");
         return map;
 	}
+	
+    @Override
+    public void algoProgressChanged(AlgoEvent evt)
+    {
+        this.fireProgressChanged(evt);
+    }
 
-	/**
-	 * Default implementation of computeTable method, using the two other
-	 * methods {@link #analyzeRegions(ImagePlus)} and {@link #createTable(Map)}:
-	 * 
-	 * @param labelPlus
-	 *            a label or binary image of region(s)
-	 * @return an instance of ResultsTable containing results presented in a
-	 *         tabular format.
-	 */
-	public ResultsTable computeTable(ImagePlus labelPlus)
-	{
-		return createTable(analyzeRegions(labelPlus));
-	}
+
+    @Override
+    public void algoStatusChanged(AlgoEvent evt)
+    {
+        this.fireProgressChanged(evt);
+    }
 }

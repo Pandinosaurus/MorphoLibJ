@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -66,9 +66,13 @@ public class KillBordersPlugin implements PlugIn
 		} 
 		long elapsedTime = System.currentTimeMillis() - t0;
 		
+		// copy image settings
 		resultPlus.copyScale(imagePlus);
+        resultPlus.setDisplayRange(imagePlus.getDisplayRangeMin(), imagePlus.getDisplayRangeMax());
+        resultPlus.setLut(imagePlus.getProcessor().getLut());
+        
+        // display with same settings
 		resultPlus.show();
-		
 		if (imagePlus.getStackSize() > 1) 
 		{
 			resultPlus.setSlice(imagePlus.getCurrentSlice());

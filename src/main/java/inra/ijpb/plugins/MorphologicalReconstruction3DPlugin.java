@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -27,7 +27,7 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import inra.ijpb.data.image.Images3D;
+import inra.ijpb.data.image.ImageUtils;
 import inra.ijpb.morphology.Reconstruction3D;
 import inra.ijpb.util.IJUtils;
 
@@ -45,7 +45,9 @@ public class MorphologicalReconstruction3DPlugin implements PlugIn {
 	 * A pre-defined set of operations for geodesic reconstruction.
 	 */
 	public enum Operation {
+		/** reconstruction by dilation */
 		BY_DILATION("By Dilation"),
+		/** reconstruction by erosion */
 		BY_EROSION("By Erosion");
 		
 		private final String label;
@@ -54,6 +56,17 @@ public class MorphologicalReconstruction3DPlugin implements PlugIn {
 			this.label = label;
 		}
 		
+		/**
+		 * Process to image given as argument.
+		 * 
+		 * @param marker
+		 *            the marker image
+		 * @param mask
+		 *            the mask image
+		 * @param conn
+		 *            the connectivity to use
+		 * @return the reconstructed image
+		 */
 		public ImageStack applyTo(ImageStack marker, ImageStack mask, int conn) {
 			if (this == BY_DILATION)
 				return Reconstruction3D.reconstructByDilation(marker, mask, conn);
@@ -68,6 +81,11 @@ public class MorphologicalReconstruction3DPlugin implements PlugIn {
 			return this.label;
 		}
 		
+		/**
+		 * Returns all the labels for this enumeration.
+		 * 
+		 * @return all the labels for this enumeration.
+		 */
 		public static String[] getAllLabels(){
 			int n = Operation.values().length;
 			String[] result = new String[n];
@@ -146,9 +164,10 @@ public class MorphologicalReconstruction3DPlugin implements PlugIn {
 		// Extract image procesors
 		ImageStack marker = markerPlus.getStack();
 		ImageStack mask = maskPlus.getStack();
-		if (!Images3D.isSameSize(marker, mask))
+		if (!ImageUtils.isSameSize(marker, mask))
 		{
 			IJ.error("Image Size Error", "Both marker and mask images must have same size");
+			return;
 		}
 		
 		long t0 = System.currentTimeMillis();

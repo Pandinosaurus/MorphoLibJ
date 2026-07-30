@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -25,6 +25,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import ij.ImageStack;
 import inra.ijpb.data.Cursor3D;
+import inra.ijpb.data.image.ImageUtils;
 import inra.ijpb.data.image.Images3D;
 
 import java.util.ArrayDeque;
@@ -165,13 +166,13 @@ public class GeodesicReconstruction3DHybrid0Gray8 extends GeodesicReconstruction
 		this.sizeX 	= marker.getWidth();
 		this.sizeY 	= marker.getHeight();
 		this.sizeZ 	= marker.getSize();
-		if (!Images3D.isSameSize(marker, mask)) 
+		if (!ImageUtils.isSameSize(marker, mask))
 		{
 			throw new IllegalArgumentException("Marker and Mask images must have the same size");
 		}
 		
 		// Check connectivity has a correct value
-		if (connectivity != 6 && connectivity != 26) 
+		if (connectivity != 6 && connectivity != 26)
 		{
 			throw new RuntimeException(
 					"Connectivity for stacks must be either 6 or 26, not "
@@ -183,7 +184,7 @@ public class GeodesicReconstruction3DHybrid0Gray8 extends GeodesicReconstruction
 		long t0 = System.currentTimeMillis();
 		trace("Initialize result ");
 		initializeResult();
-		if (verbose) 
+		if (verbose)
 		{
 			long t1 = System.currentTimeMillis();
 			System.out.println((t1 - t0) + " ms");

@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -25,7 +46,7 @@ import inra.ijpb.measure.region3d.IntrinsicVolumes3DUtils;
  * images should be specified as an array of integers.
  * 
  * @see IntrinsicVolumes2D
- * @see inra.ijpb.measure.region3d.IntrinsicVolumesAnalyzer3D
+ * @see inra.ijpb.measure.region3d.IntrinsicVolumes3D
  * 
  * @author dlegland
  *
@@ -52,7 +73,7 @@ public class IntrinsicVolumes3D
         double voxelVolume = calib.pixelWidth * calib.pixelHeight * calib.pixelDepth;
         
         // count non-zero voxels
-        int voxelCount = BinaryImages.countForegroundVoxels(image);
+        long voxelCount = BinaryImages.countForegroundVoxels(image);
 
         // convert voxel count to particle volume
         double volume = voxelCount * voxelVolume;
@@ -100,10 +121,10 @@ public class IntrinsicVolumes3D
     public static final double volumeDensity(ImageStack image)
     {
         // count non-zero voxels
-        double voxelCount = BinaryImages.countForegroundVoxels(image);
+        long voxelCount = BinaryImages.countForegroundVoxels(image);
     
         // Normalizes voxel count by image volume.
-        double voxelNumber = image.getWidth() * image.getWidth() * image.getSize();
+        double voxelNumber = ((double) image.getWidth()) * image.getWidth() * image.getSize();
         return voxelCount / voxelNumber;
     }
 
@@ -441,12 +462,24 @@ public class IntrinsicVolumes3D
         return euler / vol;
     }
     
+    /**
+	 * Returns the "inner volume" of the 3D image, i.e. the calibrated volume of
+	 * the image without taking into account the voxels at the border of the
+	 * image.
+	 * 
+	 * @param image
+	 *            the input 3D image
+	 * @param calib
+	 *            the spatial calibration of the image
+	 * @return the calibrated volume of the portion of image witout border
+	 *         voxels
+	 */
     public static final double samplingVolume(ImageStack image, Calibration calib)
     {
-        // size of image
-        int sizeX = image.getWidth();
-        int sizeY = image.getHeight();
-        int sizeZ = image.getSize();
+        // size of image, converted to double to avoid capacity overflow
+        double sizeX = image.getWidth();
+        double sizeY = image.getHeight();
+        double sizeZ = image.getSize();
         return (sizeX - 1) * calib.pixelWidth * (sizeY - 1) * calib.pixelHeight * (sizeZ - 1) * calib.pixelDepth;   
     }
     

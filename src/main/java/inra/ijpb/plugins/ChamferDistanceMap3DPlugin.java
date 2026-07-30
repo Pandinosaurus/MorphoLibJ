@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -28,18 +28,25 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import inra.ijpb.algo.DefaultAlgoListener;
-import inra.ijpb.binary.distmap.ChamferDistanceTransform3DFloat;
-import inra.ijpb.binary.distmap.ChamferDistanceTransform3DShort;
 import inra.ijpb.binary.distmap.ChamferMask3D;
 import inra.ijpb.binary.distmap.ChamferMasks3D;
-import inra.ijpb.binary.distmap.DistanceTransform3D;
+import inra.ijpb.label.distmap.DistanceTransform3D;
+import inra.ijpb.label.distmap.ChamferDistanceTransform3DFloat;
+import inra.ijpb.label.distmap.ChamferDistanceTransform3DShort;
 import inra.ijpb.data.image.Images3D;
 import inra.ijpb.util.IJUtils;
 
 /**
- * Compute distance map, with possibility to choose chamfer weights, result 
- * type, and to normalize result or not.
+ * Compute 3D distance map, with possibility to choose the chamfer mask, the
+ * result type (integer or floating point), and to normalize result or not.
+ * 
+ * In practice, the plugin works on binary as well as on label images.
  *
+ * @see inra.ijpb.label.distmap.DistanceTransform3D
+ * @see inra.ijpb.binary.distmap.ChamferMask3D
+ * @see inra.ijpb.label.distmap.ChamferDistanceTransform3DShort
+ * @see inra.ijpb.label.distmap.ChamferDistanceTransform3DFloat
+ * 
  * @author dlegland
  *
  */
@@ -72,12 +79,12 @@ public class ChamferDistanceMap3DPlugin implements PlugIn
     		return;
 
     	// set up current parameters
-    	String weightLabel = gd.getNextChoice();
+    	String maskLabel = gd.getNextChoice();
     	boolean floatProcessing = gd.getNextChoiceIndex() == 1;
     	boolean normalize = gd.getNextBoolean();
 
     	// identify which weights should be used
-    	ChamferMasks3D weightsOption = ChamferMasks3D.fromLabel(weightLabel);
+    	ChamferMasks3D weightsOption = ChamferMasks3D.fromLabel(maskLabel);
 		ChamferMask3D weights = weightsOption.getMask();
 
     	long t0 = System.currentTimeMillis();

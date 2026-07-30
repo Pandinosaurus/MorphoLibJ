@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -846,8 +867,8 @@ public class IntrinsicVolumes3DUtils
     private static final double[] eulerNumberLutC26()
     {
         double[] lut = new double[]{
-             0,  1,  1,  0,   1,  0, -2, -1,   1,  2,  0, -1,   0, -1, -1,  0,  //   0 ->  15
-             1,  0, -2, -1,   2, -1, -1, -2,  -6, -3, -3, -2,  -3, -2,  0, -1,  //  16 ->  31
+             0,  1,  1,  0,   1,  0, -2, -1,   1, -2,  0, -1,   0, -1, -1,  0,  //   0 ->  15
+             1,  0, -2, -1,  -2, -1, -1, -2,  -6, -3, -3, -2,  -3, -2,  0, -1,  //  16 ->  31
              1, -2,  0, -1,  -6, -3, -3, -2,  -2, -1, -1, -2,  -3,  0, -2, -1,  //  32 ->  47
              0, -1, -1,  0,  -3, -2,  0, -1,  -3,  0, -2, -1,   0, +1, +1,  0,  //  48 ->  63
              1, -2, -6, -3,   0, -1, -3, -2,  -2, -1, -3,  0,  -1, -2, -2, -1,  //  64 ->  79
@@ -873,6 +894,18 @@ public class IntrinsicVolumes3DUtils
         return lut;
     }
 
+    /**
+	 * Returns the "inner volume" of the 3D image, i.e. the calibrated volume of
+	 * the image without taking into account the voxels at the border of the
+	 * image.
+	 * 
+	 * @param image
+	 *            the input 3D image
+	 * @param calib
+	 *            the spatial calibration of the image
+	 * @return the calibrated volume of the portion of image witout border
+	 *         voxels
+	 */
     public static final double samplingVolume(ImageStack image, Calibration calib)
     {
         // size of image

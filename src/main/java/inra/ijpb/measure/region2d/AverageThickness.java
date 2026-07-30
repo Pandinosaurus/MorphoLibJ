@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -27,7 +48,7 @@ import inra.ijpb.label.LabelImages;
  * distance maps are used.
  * 
  * @see inra.ijpb.binary.skeleton.ImageJSkeleton
- * @see inra.ijpb.binary.distmap.DistanceTransform
+ * @see inra.ijpb.label.distmap.DistanceTransform2D
  * 
  * @author dlegland
  *
@@ -40,6 +61,9 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
     {
         // Initialize a new result table
         ResultsTable table = new ResultsTable();
+        
+        String unit = results.values().iterator().next().unit;
+        String colName = "AverageThickness_[" + unit + "]"; 
     
         // Convert all results that were computed during execution of the
         // "analyzeRegions()" method into rows of the results table
@@ -51,7 +75,7 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
             // add an entry to the resulting data table
             table.incrementCounter();
             table.addLabel(Integer.toString(label));
-            table.addValue("AverageThickness", res.avgThickness);
+            table.addValue(colName, res.avgThickness);
         }
     
         return table;
@@ -61,10 +85,16 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
     public AverageThickness.Result[] analyzeRegions(ImageProcessor image, int[] labels,
             Calibration calib)
     {
+        // check input validity
+        if (calib.pixelWidth != calib.pixelHeight)
+        {
+            throw new IllegalArgumentException("Requires input image to have square pixels (width = height)");
+        }
+        
         Map<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
 
         // first compute distance map of each label
-        ImageProcessor distanceMap = BinaryImages.distanceMap(image);
+        ImageProcessor distanceMap = LabelImages.distanceMap(image);
 
         // Compute skeleton of each region.
         ImageProcessor skeleton = BinaryImages.skeleton(image); 
@@ -81,9 +111,16 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
         {
             for (int x = 0; x < sizeX; x++)
             {
-                // label of current pixel 
+                // label of current pixel
                 int label = (int) skeleton.getf(x, y);
+                
+                // do not process background pixels
                 if (label == 0)
+                {
+                    continue;
+                }
+                // do not process labels not in the list
+                if (!labelIndices.containsKey(label))
                 {
                     continue;
                 }
@@ -96,14 +133,11 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
             }
         }
 
-        // convert to array of results
+        // convert to array of (calibrated) results 
         AverageThickness.Result[] results = new AverageThickness.Result[nLabels];
         for (int i = 0; i < nLabels; i++)
         {
-            Result res = new Result();
-            res.meanDist = sums[i] / counts[i];
-            res.avgThickness = res.meanDist * 2 - 1;
-            results[i] = res;
+        	results[i] = new Result(sums[i] / counts[i], calib);
         }
         return results;
     }
@@ -122,15 +156,33 @@ public class AverageThickness extends RegionAnalyzer2D<AverageThickness.Result>
     public class Result
     {
         /**
-         * Average distance computed along the skeleton
+         * Average distance computed along the skeleton, in pixels.
          */
-        public double meanDist;
+        public final double meanDist_Pixels;
+        
+        /**
+         * Average distance computed along the skeleton, converted in user units.
+         */
+        public final double meanDist;
         
         /**
          * Average thickness value computed from the average distance.
          * Typically: avgThickness = avgDist * 2 - 1.
          */
-        public double avgThickness;
+        public final double avgThickness;
+        
+        /**
+         * The unit associated to the measure.
+         */
+        public final String unit;
+        
+        public Result(double meanDistInPixels, Calibration calib)
+        {
+            this.meanDist_Pixels = meanDistInPixels;
+            this.meanDist = calib.pixelWidth * this.meanDist_Pixels;
+            this.avgThickness = calib.pixelWidth * (this.meanDist_Pixels * 2 - 1);
+            this.unit = calib.getUnit();
+        }
     }
 
 }

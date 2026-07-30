@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -94,18 +94,29 @@ public class ParticleAnalysis3DPlugin implements PlugIn
      * the console, and the number of counts for each direction is included in
      * results table. 
      */
+	@Deprecated
     public boolean debug  = false;
     
+	@Deprecated
 	boolean computeVolume 		= true;
+	@Deprecated
 	boolean computeSurface 		= true;
+	@Deprecated
 	boolean computeEulerNumber	= true;
+	@Deprecated
 	boolean computeSphericity 	= true;
+	@Deprecated
 	boolean computeEllipsoid 	= true;
+	@Deprecated
 	boolean computeElongations 	= true;
+	@Deprecated
 	boolean computeInscribedBall = true;
 	
+	@Deprecated
     String surfaceAreaMethod = surfaceAreaMethods[1];
+	@Deprecated
     int surfaceAreaDirs = 3;
+	@Deprecated
     int connectivity = 6;
     
     // ====================================================
@@ -115,6 +126,7 @@ public class ParticleAnalysis3DPlugin implements PlugIn
 	/* (non-Javadoc)
      * @see ij.plugin.PlugIn#run(java.lang.String)
      */
+	@Deprecated
     public void run(String args) 
     {
         ImagePlus imagePlus = IJ.getImage();
@@ -174,6 +186,7 @@ public class ParticleAnalysis3DPlugin implements PlugIn
      * @param imagePlus the label image to analyze
      * @return the results in a new ResultsTable
      */
+	@Deprecated
     public ResultsTable process(ImagePlus imagePlus)
     {
     	// Check validity of parameters
@@ -196,6 +209,7 @@ public class ParticleAnalysis3DPlugin implements PlugIn
 	 *            the spatial calibration of the image
 	 * @return the results in a new ResultsTable
 	 */
+	@Deprecated
     public ResultsTable process(ImageStack image, Calibration calib)
     {
     	// Extract spatial calibration

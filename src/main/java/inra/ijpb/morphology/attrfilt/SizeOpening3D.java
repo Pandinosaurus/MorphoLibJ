@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -34,5 +34,14 @@ import inra.ijpb.algo.Algo;
  */
 public interface SizeOpening3D extends Algo
 {
+	/**
+	 * Applies size opening on the input 3D grayscale image and returns the result.
+	 * 
+	 * @param image
+	 *            the image to process.
+	 * @param minVolume
+	 *            the minimal number of voxels the regions need to keep.
+	 * @return the result of size opening.
+	 */
 	public ImageStack process(ImageStack image, int minVolume);
 }

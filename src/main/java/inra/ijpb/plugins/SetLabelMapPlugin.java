@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -136,12 +136,17 @@ public class SetLabelMapPlugin implements PlugIn, DialogListener
 		}
 	}
 
+	/**
+	 * Displays the dialog.
+	 * 
+	 * @return the dialog
+	 */
 	public GenericDialog showDialog()
 	{
 
 		// Create a new generic dialog with appropriate options
 		GenericDialog gd = new GenericDialog("Set Label Map");
-		gd.addChoice("Colormap", CommonLabelMaps.getAllLabels(), CommonLabelMaps.GOLDEN_ANGLE.getLabel());
+		gd.addChoice("Colormap", CommonLabelMaps.getAllLabels(), CommonLabelMaps.GLASBEY_DARK.getLabel());
 		gd.addChoice("Background", CommonColors.getAllLabels(), CommonColors.WHITE.toString());
 		gd.addCheckbox("Shuffle", true);
 

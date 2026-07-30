@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -40,6 +40,7 @@ import ij.gui.PointRoi;
 import ij.gui.ProfilePlot;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
+import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.Selection;
 import ij.process.ByteProcessor;
@@ -48,19 +49,36 @@ import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
+import inra.ijpb.algo.DefaultAlgoListener;
 import inra.ijpb.binary.distmap.ChamferMask2D;
 import inra.ijpb.binary.distmap.ChamferMask3D;
-import inra.ijpb.data.Cursor2D;
-import inra.ijpb.data.Cursor3D;
+import inra.ijpb.data.image.ImageUtils;
+import inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling;
+import inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling3D;
+import inra.ijpb.data.IntBounds2D;
+import inra.ijpb.data.IntBounds3D;
+import inra.ijpb.label.distmap.ChamferDistanceTransform2DFloat;
+import inra.ijpb.label.distmap.ChamferDistanceTransform2DShort;
 import inra.ijpb.label.distmap.ChamferDistanceTransform3DFloat;
 import inra.ijpb.label.distmap.ChamferDistanceTransform3DShort;
+import inra.ijpb.label.distmap.DistanceTransform2D;
 import inra.ijpb.label.distmap.DistanceTransform3D;
-import inra.ijpb.label.distmap.LabelDilation2DShort;
-import inra.ijpb.label.distmap.LabelDilation3DShort;
+import inra.ijpb.label.edit.FindAllLabels;
+import inra.ijpb.label.edit.MergeLabels;
 import inra.ijpb.label.edit.ReplaceLabelValues;
+import inra.ijpb.label.filter.ChamferLabelDilation2DShort;
+import inra.ijpb.label.filter.ChamferLabelDilation3DShort;
 
 /**
  * Utility methods for label images (stored as 8-, 16- or 32-bits).
+ * 
+ * Most methods within this class apply an operator on the input label map(s).
+ * Some of them may return a newly created label map.
+ * 
+ * The LabelUtils class provides additional utility methods, more dedicated to
+ * plugin creators.
+ * 
+ * @see LabelUtils
  * 
  * @author David Legland
  *
@@ -286,7 +304,7 @@ public class LabelImages
 
 	/**
 	 * Returns the binary image with value equals to
-	 * <code>true</true> only when the corresponding value in the input image equals <code> label</code>.
+	 * {@code true} only when the corresponding value in the input image equals {@code label}.
 	 * 
 	 * @param image
 	 *            the input label map
@@ -317,15 +335,18 @@ public class LabelImages
 	}
 
 	/**
-	 * Returns a binary image that contains only the selected particle or
-	 * region, by automatically cropping the image and eventually adding some
-	 * borders.
-	 * 
-	 * @param imagePlus an image containing label of particles
-	 * @param label the label of the particle to select
-	 * @param border the number of pixels to add to each side of the particle
-	 * @return a smaller binary image containing only the selected particle
-	 */
+     * Returns a binary image that contains only the region identified by its
+     * label, by automatically cropping the image and eventually adding some
+     * borders.
+     * 
+     * @param imagePlus
+     *            an image containing region labels
+     * @param label
+     *            the label of the particle to select
+     * @param border
+     *            the number of pixels to add to each side of the particle
+     * @return a smaller binary image containing only the selected region
+     */
 	public static final ImagePlus cropLabel(ImagePlus imagePlus, int label,	int border) 
 	{
         String newName = imagePlus.getShortTitle() + "-crop"; 
@@ -334,31 +355,66 @@ public class LabelImages
         // Compute the cropped image
         if (imagePlus.getStackSize() == 1) 
         {
+            // crop label in image processor
             ImageProcessor image = imagePlus.getProcessor();
-            ImageProcessor cropped = LabelImages.cropLabel(image, label, border);
+            IntBounds2D bounds = labelBounds(image, label);
+            ImageProcessor cropped = LabelImages.cropLabel(image, label, bounds, border);
             croppedPlus = new ImagePlus(newName, cropped);
+            
+            // update spatial calibration
+			Calibration calib = imagePlus.getCalibration().copy();
+			calib.xOrigin += (bounds.getXMin() - border) * calib.pixelWidth;
+			calib.yOrigin += (bounds.getYMin() - border) * calib.pixelHeight;
+			croppedPlus.setCalibration(calib);
         }
         else
         {
+            // crop label in image stack
             ImageStack image = imagePlus.getStack();
-            ImageStack cropped = LabelImages.cropLabel(image, label, border);
+            IntBounds3D bounds = labelBounds(image, label);
+            ImageStack cropped = LabelImages.cropLabel(image, label, bounds, border);
             croppedPlus = new ImagePlus(newName, cropped);
+            
+            // update spatial calibration
+			Calibration calib = imagePlus.getCalibration().copy();
+			calib.xOrigin += (bounds.getXMin() - border) * calib.pixelWidth;
+			calib.yOrigin += (bounds.getYMin() - border) * calib.pixelHeight;
+			calib.zOrigin += (bounds.getZMin() - border) * calib.pixelDepth;
+			croppedPlus.setCalibration(calib);
         }
 
         return croppedPlus;
 	}
 
 	/**
-	 * Returns a binary image that contains only the selected particle or
-	 * region, by automatically cropping the image and eventually adding some
-	 * borders.
-	 * 
-	 * @param image a, image containing label of particles
-	 * @param label the label of the particle to select
-	 * @param border the number of pixels to add to each side of the particle
-	 * @return a smaller binary image containing only the selected particle
-	 */
+     * Returns a binary image that contains only the region identified by its
+     * label, by automatically cropping the image and eventually adding some
+     * borders.
+     * 
+     * @param image
+     *            an image containing label of particles
+     * @param label
+     *            the label of the particle to select
+     * @param border
+     *            the number of pixels to add to each side of the particle
+     * @return a smaller binary image containing only the selected particle
+     */
 	public static final ImageProcessor cropLabel(ImageProcessor image, int label, int border) 
+	{
+		IntBounds2D bounds = labelBounds(image, label);
+		return cropLabel(image, label, bounds, border);
+	}
+	
+    /**
+     * Computes the bounds of a region within a label image.
+     * 
+     * @param image
+     *            the label map image containing the region.
+     * @param label
+     *            the label of the region
+     * @return the bounds of the region
+     */
+	public static final IntBounds2D labelBounds(ImageProcessor image, int label) 
 	{
 		// image size
 		int sizeX = image.getWidth();
@@ -376,7 +432,7 @@ public class LabelImages
 			for (int x = 0; x < sizeX; x++)
 			{
 				// process only specified label
-				int val = image.get(x, y);
+				int val = (int) image.getf(x, y);
 				if (val != label)
 				{
 					continue;
@@ -389,41 +445,64 @@ public class LabelImages
 				ymax = max(ymax, y);
 			}
 		}
+		
+		return new IntBounds2D(xmin, xmax, ymin, ymax);
+	}
 
+	private static final ImageProcessor cropLabel(ImageProcessor image, int label, IntBounds2D bounds, int border) 
+	{
 		// Compute size of result, taking into account border
-		int sizeX2 = (xmax - xmin + 1 + 2 * border);
-		int sizeY2 = (ymax - ymin + 1 + 2 * border);
+		int sizeX2 = bounds.getWidth() + 2 * border;
+		int sizeY2 = bounds.getHeight() + 2 * border;
 
 		// allocate memory for result image
 		ImageProcessor result = new ByteProcessor(sizeX2, sizeY2);
 		
 		// fill result with binary label
-		for (int y = ymin, y2 = border; y <= ymax; y++, y2++) 
+		for (int y = border, yref = bounds.getYMin(); y < sizeY2 - border; y++, yref++)
 		{
-			for (int x = xmin, x2 = border; x <= xmax; x++, x2++) 
+			for (int x = border, xref = bounds.getXMin(); x < sizeX2 - border; x++, xref++)
 			{
-				if ((image.get(x, y)) == label)
+				if (((int) image.getf(xref, yref)) == label)
 				{
-					result.set(x2, y2, 255);
+					result.set(x, y, 255);
 				}
+				
 			}
 		}
-
+		
 		return result;
 	}
 	
-
 	/**
-	 * Returns a binary image that contains only the selected particle or
-	 * region, by automatically cropping the image and eventually adding some
-	 * borders.
-	 * 
-	 * @param image a 3D image containing label of particles
-	 * @param label the label of the particle to select
-	 * @param border the number of voxels to add to each side of the particle
-	 * @return a smaller binary image containing only the selected particle
-	 */
+     * Returns a binary image that contains only the region identified by its
+     * label, by automatically cropping the image and eventually adding some
+     * borders.
+     * 
+     * @param image
+     *            a 3D label map containing label of regions
+     * @param label
+     *            the label of the particle to select
+     * @param border
+     *            the number of voxels to add to each side of the particle
+     * @return a smaller binary image containing only the selected particle
+     */
 	public static final ImageStack cropLabel(ImageStack image, int label, int border) 
+	{
+		IntBounds3D bounds = labelBounds(image, label);
+		return cropLabel(image, label, bounds, border);
+	}
+	
+	/**
+     * Computes the bounds of a region within a 3D label image.
+     * 
+     * @param image
+     *            the image containing the region.
+     * @param label
+     *            the label of the region
+     * @return the 3D bounds of the region
+     */
+	public static final IntBounds3D labelBounds(ImageStack image, int label) 
 	{
 		// image size
 		int sizeX = image.getWidth();
@@ -463,31 +542,35 @@ public class LabelImages
 			}
 		}
 		
+		return new IntBounds3D(xmin, xmax, ymin, ymax, zmin, zmax);
+	}
+	
+	private static final ImageStack cropLabel(ImageStack image, int label, IntBounds3D bounds, int border) 
+	{
 		// Compute size of result, taking into account border
-		int sizeX2 = (xmax - xmin + 1 + 2 * border);
-		int sizeY2 = (ymax - ymin + 1 + 2 * border);
-		int sizeZ2 = (zmax - zmin + 1 + 2 * border);
+		int sizeX2 = bounds.getWidth() + 2 * border;
+		int sizeY2 = bounds.getHeight() + 2 * border;
+		int sizeZ2 = bounds.getDepth() + 2 * border;
 
 		// allocate memory for result image
 		ImageStack result = ImageStack.create(sizeX2, sizeY2, sizeZ2, 8);
 		
 		// fill result with binary label
-		for (int z = zmin, z2 = border; z <= zmax; z++, z2++) 
+		for (int z = border, zref = bounds.getZMin(); z < sizeZ2 - border; z++, zref++)
 		{
-			for (int y = ymin, y2 = border; y <= ymax; y++, y2++) 
+			for (int y = border, yref = bounds.getYMin(); y < sizeY2 - border; y++, yref++)
 			{
-				for (int x = xmin, x2 = border; x <= xmax; x++, x2++) 
+				for (int x = border, xref = bounds.getXMin(); x < sizeX2 - border; x++, xref++)
 				{
-					if (((int) image.getVoxel(x, y, z)) == label)
+					if (((int) image.getVoxel(xref, yref, zref)) == label)
 					{
-						result.setVoxel(x2, y2, z2, 255);
+						result.setVoxel(x, y, z, 255);
 					}
-				}
+				}	
 			}
 		}
 		
 		return result;
-
 	}
 	
 	/**
@@ -1226,103 +1309,45 @@ public class LabelImages
 	 * Returns the set of unique labels existing in the given image, excluding
 	 * the value zero (used for background).
 	 * 
+	 * #see inra.ijpb.label.edit.FindAllLabels
+	 * 
 	 * @param image
 	 *            an instance of ImagePlus containing a label image
 	 * @return the list of unique labels present in image (without background)
 	 */
     public final static int[] findAllLabels(ImagePlus image) 
     {
-		return image.getStackSize() == 1 ? findAllLabels(image.getProcessor())
-				: findAllLabels(image.getStack());
+        return new FindAllLabels().process(image);
     }
 
     /**
      * Returns the set of unique labels existing in the given stack, excluding 
      * the value zero (used for background).
 	 * 
+     * #see inra.ijpb.label.edit.FindAllLabels
+     * 
 	 * @param image
 	 *            a 3D label image
 	 * @return the list of unique labels present in image (without background)
      */
     public final static int[] findAllLabels(ImageStack image) 
     {
-        int sizeX = image.getWidth();
-        int sizeY = image.getHeight();
-        int sizeZ = image.getSize();
-        
-        TreeSet<Integer> labels = new TreeSet<Integer> ();
-        
-        // iterate on image pixels
-        for (int z = 0; z < sizeZ; z++) 
-        {
-        	for (int y = 0; y < sizeY; y++)  
-        	{
-        		for (int x = 0; x < sizeX; x++)
-        		{
-        			labels.add((int) image.getVoxel(x, y, z));
-        		}
-        	}
-        }
-        
-        // remove 0 if it exists
-        if (labels.contains(0))
-            labels.remove(0);
-        
-        // convert to array of integers
-        int[] array = new int[labels.size()];
-        Iterator<Integer> iterator = labels.iterator();
-        for (int i = 0; i < labels.size(); i++) 
-            array[i] = iterator.next();
-        
-        return array;
+        return new FindAllLabels().process(image);
     }
 
     /**
      * Returns the set of unique labels existing in the given image, excluding 
      * the value zero (used for background).
 	 * 
+     * #see inra.ijpb.label.edit.FindAllLabels
+     * 
 	 * @param image
 	 *            a label image
 	 * @return the list of unique labels present in image (without background)
      */
     public final static int[] findAllLabels(ImageProcessor image)
     {
-        int sizeX = image.getWidth();
-        int sizeY = image.getHeight();
-        
-        TreeSet<Integer> labels = new TreeSet<Integer> ();
-        
-        // iterate on image pixels
-        if (image instanceof FloatProcessor) 
-        {
-        	// For float processor, use explicit case to int from float value  
-        	for (int y = 0; y < sizeY; y++) 
-        	{
-        		for (int x = 0; x < sizeX; x++) 
-        			labels.add((int) image.getf(x, y));
-        	}
-        } 
-        else
-        {
-        	// for integer-based images, simply use integer result
-        	for (int y = 0; y < sizeY; y++) 
-        	{
-        		for (int x = 0; x < sizeX; x++) 
-        			labels.add(image.get(x, y));
-        	}
-        }
-        
-        // remove 0 if it exists
-        if (labels.contains(0))
-            labels.remove(0);
-        
-        // convert to array of integers
-        int[] array = new int[labels.size()];
-        Iterator<Integer> iterator = labels.iterator();
-        for (int i = 0; i < labels.size(); i++) 
-            array[i] = iterator.next();
-        
-        return array;
+        return new FindAllLabels().process(image);
     }
 
 	/**
@@ -1617,15 +1642,52 @@ public class LabelImages
 		return result;
 	}
 	
+    /**
+     * Applies the given Look-up table to the input label image.
+     * 
+     * @param labelImage
+     *            a label image (2D or 3D)
+     * @param values
+     *            a set of values associated to each unique label
+     * @return a new ImagePlus containing for each pixel or voxel, either the value
+     *         associated to the corresponding label, or 0 if the pixel is
+     *         background
+     */
+	public static final ImagePlus applyLut(ImagePlus labelImage, double[] values)
+	{
+        ImagePlus resultPlus;
+        String newName = labelImage.getShortTitle() + "-applyLut";
+        
+        // Dispatch to appropriate function depending on dimension
+        if (labelImage.getStackSize() == 1) 
+        {
+            // process planar image
+            ImageProcessor image = labelImage.getProcessor();
+            ImageProcessor result = applyLut(image, values);
+            resultPlus = new ImagePlus(newName, result);
+        }
+        else 
+        {
+            // process image stack
+            ImageStack image = labelImage.getStack();
+            ImageStack result = applyLut(image, values);
+            resultPlus = new ImagePlus(newName, result);
+        }
+        
+        resultPlus.copyScale(labelImage);
+        
+        return resultPlus;
+	}
+	
 	/**
-	 * Applies the given Look-up table to the input label image.
+	 * Applies the given Look-up table to the input 2D label image.
 	 * 
 	 * @param labelImage
 	 *            a label image
 	 * @param values
 	 *            a set of values associated to each unique label
 	 * @return a new FloatProcessor containing for each pixel, either the value
-	 *         associated to the corresponding pixel, or 0 if the pixel is
+	 *         associated to the corresponding label, or 0 if the pixel is
 	 *         background
 	 */
 	public static final FloatProcessor applyLut(ImageProcessor labelImage, double[] values)
@@ -1668,14 +1730,14 @@ public class LabelImages
 	}
 	
 	/**
-	 * Applies the given Look-up table to the input label image.
+	 * Applies the given Look-up table to the input 3D label image.
 	 * 
 	 * @param labelImage
 	 *            a 3D label image
 	 * @param values
 	 *            a set of values associated to each unique label
 	 * @return a new 3D image containing for each pixel, either the value
-	 *         associated to the corresponding pixel, or 0 if the pixel is
+	 *         associated to the corresponding label, or 0 if the voxel is
 	 *         background
 	 */
 	public static final ImageStack applyLut(ImageStack labelImage, double[] values)
@@ -1754,6 +1816,122 @@ public class LabelImages
         return labelIndices;
 	}
 	
+    /**
+     * Computes the labels in the binary 2D or 3D image contained in the given
+     * ImagePlus, and computes the maximum label to set up the display range of
+     * the resulting ImagePlus.
+     * 
+     * @param imagePlus
+     *            contains the 3D binary image stack
+     * @param regionLabel
+     *            the label of the region to process, that can be the background
+     *            (value 0)
+     * @param conn
+     *            the connectivity, either 4 or 8 for planar images, or 6 or 26
+     *            for 3D images
+     * @param bitDepth
+     *            the number of bits used to create the result image (8, 16 or
+     *            32)
+     * @return an ImagePlus containing the label of each connected component.
+     * @throws RuntimeException
+     *             if the number of labels reaches the maximum number that can
+     *             be represented with this bitDepth
+     * 
+     * @see inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling
+     * @see inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling3D
+     * @see inra.ijpb.morphology.FloodFill
+     */
+    public final static ImagePlus regionComponentsLabeling(ImagePlus imagePlus, 
+            int regionLabel, int conn, int bitDepth)
+    {
+        ImagePlus labelPlus;
+    
+        // Dispatch processing depending on input image dimensionality
+        if (imagePlus.getStackSize() == 1)
+        {
+            ImageProcessor labels = regionComponentsLabeling(imagePlus.getProcessor(),
+                    regionLabel, conn, bitDepth);
+            labelPlus = new ImagePlus("Labels", labels);
+        }
+        else 
+        {
+            ImageStack labels = regionComponentsLabeling(imagePlus.getStack(),
+                    regionLabel, conn, bitDepth);
+            labelPlus = new ImagePlus("Labels", labels);
+        }
+
+        // setup display range to show largest label as white
+        double nLabels = ImageUtils.findMaxValue(labelPlus);
+        labelPlus.setDisplayRange(0, nLabels);
+        return labelPlus;
+    }
+    
+    /**
+     * Computes the labels of the connected components in the given planar
+     * binary image. The type of result is controlled by the bitDepth option.
+     * 
+     * Uses a Flood-fill type algorithm.
+     * 
+     * @param image
+     *            contains the binary image (any type is accepted)
+     * @param regionLabel
+     *            the label of the region to process, that can be the background
+     *            (value 0)
+     * @param conn
+     *            the connectivity, either 4 or 8
+     * @param bitDepth
+     *            the number of bits used to create the result image (8, 16 or
+     *            32)
+     * @return a new instance of ImageProcessor containing the label of each
+     *         connected component.
+     * @throws RuntimeException
+     *             if the number of labels reaches the maximum number that can
+     *             be represented with this bitDepth
+     *             
+     * @see inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling     
+     * @see inra.ijpb.binary.conncomp.ConnectedComponentsLabeling
+     */
+    public final static ImageProcessor regionComponentsLabeling(ImageProcessor image,
+            int regionLabel, int conn, int bitDepth) 
+    {
+        FloodFillRegionComponentsLabeling algo = new FloodFillRegionComponentsLabeling(conn, bitDepth);
+        DefaultAlgoListener.monitor(algo);
+        return algo.computeLabels(image, regionLabel);
+    }
+
+    /**
+     * Computes the labels of the connected components in the given 3D binary
+     * image. The type of result is controlled by the bitDepth option.
+     * 
+     * Uses a Flood-fill type algorithm.
+     * 
+     * @param image
+     *            contains the 3D binary image (any type is accepted)
+     * @param regionLabel
+     *            the label of the region to process, that can be the background
+     *            (value 0)
+     * @param conn
+     *            the connectivity, either 6 or 26
+     * @param bitDepth
+     *            the number of bits used to create the result stack (8, 16 or
+     *            32)
+     * @return a new instance of ImageStack containing the label of each
+     *         connected component.
+     * @throws RuntimeException
+     *             if the number of labels reaches the maximum number that can
+     *             be represented with this bitDepth
+     *             
+     * @see inra.ijpb.label.conncomp.FloodFillRegionComponentsLabeling3D     
+     * @see inra.ijpb.binary.conncomp.ConnectedComponentsLabeling3D     
+     */
+    public final static ImageStack regionComponentsLabeling(ImageStack image,
+            int regionLabel, int conn, int bitDepth)
+    {
+        FloodFillRegionComponentsLabeling3D algo = new FloodFillRegionComponentsLabeling3D(conn, bitDepth);
+        DefaultAlgoListener.monitor(algo);
+        return algo.computeLabels(image, regionLabel);
+    }
+
 	/**
 	 * Merge labels selected by freehand or point tool. Labels are merged
 	 * in place (i.e., the input image is modified). Zero-value label is never
@@ -1900,77 +2078,7 @@ public class LabelImages
      */
     public static final void mergeLabelsWithGap(ImageProcessor image, float[] labels, float newLabel, int conn)
     {
-        // get image size
-        int sizeX = image.getWidth();
-        int sizeY = image.getHeight();
-        
-        // convert array to tree (to accelerate search)
-        TreeSet<Float> labelSet = new TreeSet<Float>();
-        for (int i = 0; i < labels.length; i++)
-        {
-            labelSet.add(labels[i]);
-        }
-        
-        // determines the shift to compute neighbor coordinates
-        int[][] shifts;
-        if (conn == 4)
-        {
-            shifts = new int[][] {{0, -1}, {-1, 0}, {1, 0}, {0, 1}};
-        }
-        else if (conn == 8)
-        {
-            shifts = new int[][] { 
-                { -1, -1 }, { 0, -1 }, { 1, -1 },   // previous line
-                { -1, 0 }, { 1, 0 },                // current line
-                { -1, 1 }, { 0, 1 }, { 1, 1 } };    // next line
-        }
-        else
-        {
-            throw new IllegalArgumentException("Connectivity value should be either 4 or 8.");
-        }
-        
-        // create structure to store the boundary pixels
-        ArrayList<Cursor2D> boundaryPixels = new ArrayList<Cursor2D>();
-        
-        // process background pixels in-between two or more labels
-        for (int y = 0; y < sizeY; y++)
-        {
-            for (int x = 0; x < sizeX; x++)
-            {
-                // focus on background pixels
-                if (image.getf(x, y) != 0)
-                    continue;
-
-                // extract the neighbor labels
-                ArrayList<Float> neighborLabels = new ArrayList<Float>(shifts.length);
-                for (int[] shift : shifts)
-                {
-                    int x2 = x + shift[0];
-                    if (x2 < 0 || x2 >= sizeX) continue;
-
-                    int y2 = y + shift[1];
-                    if (y2 < 0 || y2 >= sizeY) continue;
-
-                    float value2 = image.getf(x2, y2);
-                    if (value2 == 0) continue;
-
-                    if (!neighborLabels.contains(value2))
-                    {
-                        neighborLabels.add(value2);
-                    }
-                }
-
-                // count number of neighbors
-                if (neighborLabels.size() > 1 && labelSet.containsAll(neighborLabels))
-                    boundaryPixels.add(new Cursor2D(x, y));
-            }
-        }
-        
-        // replace label value of all regions
-        replaceLabels(image, labels, newLabel);
-
-        for (Cursor2D c : boundaryPixels)
-            image.setf(c.getX(), c.getY(), newLabel);          
+    	new MergeLabels().process(image, labels, newLabel, conn);
     }
 
     /**
@@ -1986,87 +2094,7 @@ public class LabelImages
      */
     public static final void mergeLabelsWithGap(ImageStack image, float[] labels, float newLabel, int conn)
     {
-        // get image size
-        int sizeX = image.getWidth();
-        int sizeY = image.getHeight();
-        int sizeZ = image.getSize();
-        
-        // convert array to tree (to accelerate search)
-        TreeSet<Float> labelSet = new TreeSet<Float>();
-        for (int i = 0; i < labels.length; i++)
-        {
-            labelSet.add(labels[i]);
-        }
-        
-        // determines the shift to compute neighbor coordinates
-        int[][] shifts;
-        if (conn == 6)
-        {
-            shifts = new int[][] {{0, 0, -1}, {0, -1, 0}, {-1, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-        }
-        else if (conn == 26)
-        {
-            shifts = new int[][] {
-                // previous slice (dz = -1)
-                {-1, -1, -1}, {0, -1, -1}, {1, -1, -1},   {-1, 0, -1}, {0, 0, -1}, {1, 0, -1},   {-1, 1, -1}, {0, 1, -1}, {1, 1, -1},   
-                // current slice (dz = 0)
-                {-1, -1, 0}, {0, -1, 0}, {1, -1, 0},   {-1, 0, 0}, {1, 0, 0},   {-1, 1, 0}, {0, 1, 0}, {1, 1, 0},   
-                // next slice (dz = +1 )
-                {-1, -1, 1}, {0, -1, 1}, {1, -1, 1},   {-1, 0, 1}, {0, 0, 1}, {1, 0, 1},   {-1, 1, 1}, {0, 1, 1}, {1, 1, 1}};
-        }
-        else
-        {
-            throw new IllegalArgumentException("Connectivity value should be either 6 or 26.");
-        }
-        
-        // create structure to store the boundary voxels
-        ArrayList<Cursor3D> boundaryVoxels = new ArrayList<Cursor3D>();
-        
-        // process background pixels in-between two or more labels
-        for (int z = 0; z < sizeZ; z++)
-        {
-            for (int y = 0; y < sizeY; y++)
-            {
-                for (int x = 0; x < sizeX; x++)
-                {
-                    // process only background voxels
-                    if(image.getVoxel(x, y, z) != 0)
-                        continue;
-
-                    // extract the neighbor labels
-                    ArrayList<Float> neighborLabels = new ArrayList<Float>(shifts.length);
-                    for (int[] shift : shifts)
-                    {
-                        int x2 = x + shift[0];
-                        if (x2 < 0 || x2 >= sizeX) continue;
-
-                        int y2 = y + shift[1];
-                        if (y2 < 0 || y2 >= sizeY) continue;
-
-                        int z2 = z + shift[2];
-                        if (z2 < 0 || z2 >= sizeZ) continue;
-
-                        float value2 = (float) image.getVoxel(x2, y2, z2);
-                        if (value2 == 0) continue;
-
-                        if (!neighborLabels.contains(value2))
-                        {
-                            neighborLabels.add(value2);
-                        }
-                    }
-
-                    // check if all neighbor labels are in the label set
-                    if (neighborLabels.size() > 1 && labelSet.containsAll(neighborLabels))
-                        boundaryVoxels.add(new Cursor3D(x, y, z));
-                }
-            }
-        }
-        
-        // replace label value of all regions
-        replaceLabels(image, labels, newLabel);
-        
-        for (Cursor3D c : boundaryVoxels)
-          image.setVoxel(c.getX(), c.getY(), c.getZ(), newLabel);          
+    	new MergeLabels().process(image, labels, newLabel, conn);
     }
 
     /**
@@ -2076,7 +2104,7 @@ public class LabelImages
 	 * @param roi  FreehandRoi or PointRoi with selected labels
 	 * @param verbose  flag to print deleted labels in log window
 	 */
-	public static void removeLabels(
+	public static final void removeLabels(
 			final ImagePlus labelImage,
 			final Roi roi,
 			final boolean verbose )
@@ -2112,29 +2140,64 @@ public class LabelImages
 	}
 
 	/**
-	 * Computes the distance map from a 3D image of labels
+	 * Computes the distance map for each region within a label map.
 	 * 
-	 * Distance is computed for each label voxel, as the chamfer distance to the
-	 * nearest voxel with a different value.
+	 * Distance is computed for each label pixel, as the chamfer distance to the
+	 * nearest pixel with a different value.
 	 * 
 	 * @param image
-	 *            the input 3D label image
+	 *            the input label image
 	 * @return the distance map obtained after applying the distance transform
 	 */
-	public static final ImageStack distanceMap(ImageStack image)
+	public static final ImageProcessor distanceMap(ImageProcessor image)
 	{
-		DistanceTransform3D algo = new ChamferDistanceTransform3DFloat(ChamferMask3D.BORGEFORS);
+		DistanceTransform2D algo = new ChamferDistanceTransform2DFloat(ChamferMask2D.BORGEFORS);
 		return algo.distanceMap(image);
 	}
 	
 	/**
-	 * Computes the distance map from a 3D image of labels
+     * <p>
+     * Computes the distance map for each region within a label map, by
+     * specifying the chamfer mask and the normalization.
+     * </p>
+     * 
+     * <p>
+     * Distance is computed for each foreground (white) pixel, as the chamfer
+     * distance to the nearest background (black) pixel. Result is given in a
+     * new instance of <code>FloatProcessor</code> or
+     * <code>ShortProcessort</code>, depending on the <code>floatingPoint</code>
+     * flag.
+     * </p>
+     * 
+     * @param image
+     *            the input binary or label image
+     * @param mask
+     *            the chamfer mask used to propagate distances
+     * @param floatingPoint
+     *            indicates if the computation should be performed using
+     *            floating point computation
+     * @param normalize
+     *            indicates whether the resulting distance map should be
+     *            normalized (divide distances by the first chamfer weight)
+     * @return the distance map obtained after applying the distance transform
+     */
+	public static final ImageProcessor distanceMap(ImageProcessor image,
+			ChamferMask2D mask, boolean floatingPoint, boolean normalize) 
+	{
+		DistanceTransform2D algo = floatingPoint 
+				? new ChamferDistanceTransform2DFloat(mask, normalize)
+				: new ChamferDistanceTransform2DShort(mask, normalize);
+		return algo.distanceMap(image);
+	}
+	
+	/**
+     * Computes the distance map for each region within a label map.
 	 * 
-	 * Distance is computed for each label voxel, as the chamfer distance to the
-	 * nearest voxel with a different value.
+	 * Distance is computed for each label pixel, as the chamfer distance to the
+	 * nearest pixel with a different value.
 	 * 
 	 * @param image
-	 *            the input 3D image of labels
+	 *            the input image of labels
 	 * @param weights
 	 *            an array of chamfer weights, with at least three values
 	 * @param normalize
@@ -2142,11 +2205,11 @@ public class LabelImages
 	 *            normalized (divide distances by the first chamfer weight)
 	 * @return the distance map obtained after applying the distance transform
 	 */
-	public static final ImageStack distanceMap(ImageStack image,
+	public static final ImageProcessor distanceMap(ImageProcessor image,
 			short[] weights, boolean normalize)
 	{
-		ChamferMask3D mask = ChamferMask3D.fromWeights(weights);
-		DistanceTransform3D	algo = new ChamferDistanceTransform3DShort(mask, normalize);
+		ChamferMask2D mask = ChamferMask2D.fromWeights(weights);
+		DistanceTransform2D	algo = new ChamferDistanceTransform2DShort(mask, normalize);
 			
 		return algo.distanceMap(image);
 	}
@@ -2166,15 +2229,111 @@ public class LabelImages
 	 *            normalized (divide distances by the first chamfer weight)
 	 * @return the distance map obtained after applying the distance transform
 	 */
-	public static final ImageStack distanceMap(ImageStack image, 
+	public static final ImageProcessor distanceMap(ImageProcessor image, 
 			float[] weights, boolean normalize)
 	{
-		ChamferMask3D mask = ChamferMask3D.fromWeights(weights);
-		DistanceTransform3D	algo = new ChamferDistanceTransform3DFloat(mask, normalize);
+		ChamferMask2D mask = ChamferMask2D.fromWeights(weights);
+		DistanceTransform2D	algo = new ChamferDistanceTransform2DFloat(mask, normalize);
 		return algo.distanceMap(image);
 	}
 	
-	/**
+    /**
+     * Computes the 3D distance map from an image of labels.
+     * 
+     * Distance is computed for each label voxel, as the chamfer distance to the
+     * nearest voxel with a different value.
+     * 
+     * @param image
+     *            the input 3D label image
+     * @return the distance map obtained after applying the distance transform
+     */
+    public static final ImageStack distanceMap(ImageStack image)
+    {
+        DistanceTransform3D algo = new ChamferDistanceTransform3DFloat(ChamferMask3D.BORGEFORS);
+        return algo.distanceMap(image);
+    }
+    
+    /**
+     * <p>
+     * Computes the 3D distance map from an image of labels, by specifying
+     * the chamfer mask and the normalization.
+     * </p>
+     * 
+     * <p>
+     * Distance is computed for each foreground (white) pixel, as the chamfer
+     * distance to the nearest background (black) pixel. Result is given in a
+     * new instance of FloatProcessor.
+     * </p>
+     * 
+     * @param image
+     *            the input 3D binary or label image
+     * @param mask
+     *            the chamfer mask used to propagate distances
+     * @param floatingPoint
+     *            indicates if the computation should be performed using
+     *            floating point computation
+     * @param normalize
+     *            indicates whether the resulting distance map should be
+     *            normalized (divide distances by the first chamfer weight)
+     * @return the distance map obtained after applying the distance transform
+     */
+    public static final ImageStack distanceMap(ImageStack image,
+            ChamferMask3D mask, boolean floatingPoint, boolean normalize) 
+    {
+        DistanceTransform3D algo = floatingPoint 
+                ? new ChamferDistanceTransform3DFloat(mask, normalize)
+                : new ChamferDistanceTransform3DShort(mask, normalize);
+        return algo.distanceMap(image);
+    }
+    
+    /**
+     * Computes the distance map from a 3D image of labels
+     * 
+     * Distance is computed for each label voxel, as the chamfer distance to the
+     * nearest voxel with a different value.
+     * 
+     * @param image
+     *            the input 3D image of labels
+     * @param weights
+     *            an array of chamfer weights, with at least three values
+     * @param normalize
+     *            indicates whether the resulting distance map should be
+     *            normalized (divide distances by the first chamfer weight)
+     * @return the distance map obtained after applying the distance transform
+     */
+    public static final ImageStack distanceMap(ImageStack image,
+            short[] weights, boolean normalize)
+    {
+        ChamferMask3D mask = ChamferMask3D.fromWeights(weights);
+        DistanceTransform3D algo = new ChamferDistanceTransform3DShort(mask, normalize);
+            
+        return algo.distanceMap(image);
+    }
+    
+    /**
+     * Computes the distance map from a 3D image of labels
+     * 
+     * Distance is computed for each label voxel, as the chamfer distance to the
+     * nearest voxel with a different value.
+     * 
+     * @param image
+     *            the input 3D image of labels
+     * @param weights
+     *            an array of chamfer weights, with at least three values
+     * @param normalize
+     *            indicates whether the resulting distance map should be
+     *            normalized (divide distances by the first chamfer weight)
+     * @return the distance map obtained after applying the distance transform
+     */
+    public static final ImageStack distanceMap(ImageStack image, 
+            float[] weights, boolean normalize)
+    {
+        ChamferMask3D mask = ChamferMask3D.fromWeights(weights);
+        DistanceTransform3D algo = new ChamferDistanceTransform3DFloat(mask, normalize);
+        return algo.distanceMap(image);
+    }
+    
+    /**
 	 * Applies a constrained dilation to each region in the 3D label map:
 	 * <ul>
 	 * <li>The dilation of each region is constrained by the other regions;</li>
@@ -2182,7 +2341,7 @@ public class LabelImages
 	 * unit)</li>
 	 * </ul>
 	 * 
-	 * @param labelMap
+	 * @param imagePlus
 	 *            the image of regions to process
 	 * @param distMax
 	 *            the maximum distance used for dilation
@@ -2221,47 +2380,47 @@ public class LabelImages
 	}
 	
 	/**
-	 * Applies a constrained dilation to each region in the label map:
-	 * <ul>
-	 * <li>The dilation of each region is constrained by the other regions;</li>
-	 * <li>The dilation extent is limited by the specified distance (in pixel
-	 * unit)</li>
-	 * </ul>
-	 * 
-	 * @param labelMap
-	 *            the image of regions to process
-	 * @param distMax
-	 *            the maximum distance used for dilation
-	 * @return a new label map of regions, where regions are dilated only over
-	 *         the background.
-	 */
-	public static final ImageProcessor dilateLabels(ImageProcessor labelMap, double distMax)
+     * Applies a constrained dilation to each region in the label map:
+     * <ul>
+     * <li>The dilation of each region is constrained by the other regions;</li>
+     * <li>The dilation extent is given by a radius value (in pixel unit). In
+     * practice, the distance to radius+0.5 is computed.</li>
+     * </ul>
+     * 
+     * @param labelMap
+     *            the image of regions to process
+     * @param radius
+     *            the radius of dilation of labels over the background
+     * @return a new label map of regions, where regions are dilated only over
+     *         the background.
+     */
+	public static final ImageProcessor dilateLabels(ImageProcessor labelMap, double radius)
 	{
-		LabelDilation2DShort algo = new LabelDilation2DShort(ChamferMask2D.CHESSKNIGHT);
-		ImageProcessor result = algo.process(labelMap, distMax);
+	    ChamferLabelDilation2DShort algo = new ChamferLabelDilation2DShort(ChamferMask2D.CHESSKNIGHT, radius);
+		ImageProcessor result = algo.process(labelMap);
 		result.setLut(labelMap.getLut());
 		return result;
 	}
 	
 	/**
-	 * Applies a constrained dilation to each region in the 3D label map:
-	 * <ul>
-	 * <li>The dilation of each region is constrained by the other regions;</li>
-	 * <li>The dilation extent is limited by the specified distance (in voxel
-	 * unit)</li>
-	 * </ul>
-	 * 
-	 * @param labelMap
-	 *            the image of regions to process
-	 * @param distMax
-	 *            the maximum distance used for dilation
-	 * @return a new label map of regions, where regions are dilated only over
-	 *         the background.
-	 */
-	public static final ImageStack dilateLabels(ImageStack labelMap, double distMax)
+     * Applies a constrained dilation to each region in the 3D label map:
+     * <ul>
+     * <li>The dilation of each region is constrained by the other regions;</li>
+     * <li>The dilation extent is limited by the the radius value (in voxel
+     * unit). In practice, the distance to radius+0.5 is computed.</li>
+     * </ul>
+     * 
+     * @param labelMap
+     *            the image of regions to process
+     * @param radius
+     *            the radius of dilation of labels over the background
+     * @return a new label map of regions, where regions are dilated only over
+     *         the background.
+     */
+	public static final ImageStack dilateLabels(ImageStack labelMap, double radius)
 	{
-		LabelDilation3DShort algo = new LabelDilation3DShort(ChamferMask3D.SVENSSON_3_4_5_7);
-		ImageStack result = algo.process(labelMap, distMax);
+	    ChamferLabelDilation3DShort algo = new ChamferLabelDilation3DShort(ChamferMask3D.SVENSSON_3_4_5_7, radius);
+		ImageStack result = algo.process(labelMap);
 		result.setColorModel(labelMap.getColorModel());
 		return result;
 	}
@@ -2275,7 +2434,7 @@ public class LabelImages
 	 * @param roi  FreehandRoi or PointRoi with selected labels
 	 * @return list of selected labels
 	 */
-	public static ArrayList<Float> getSelectedLabels(
+	public static final ArrayList<Float> getSelectedLabels(
 			final ImagePlus labelImage,
 			final Roi roi )
 	{

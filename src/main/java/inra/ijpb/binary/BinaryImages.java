@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -41,8 +41,8 @@ import inra.ijpb.binary.distmap.ChamferMask3D;
 import inra.ijpb.binary.distmap.DistanceTransform;
 import inra.ijpb.binary.distmap.DistanceTransform3D;
 import inra.ijpb.binary.geodesic.GeodesicDistanceTransform;
-import inra.ijpb.binary.geodesic.GeodesicDistanceTransformFloat;
-import inra.ijpb.binary.geodesic.GeodesicDistanceTransformShort;
+import inra.ijpb.binary.geodesic.GeodesicDistanceTransformFloatHybrid;
+import inra.ijpb.binary.geodesic.GeodesicDistanceTransformShortHybrid;
 import inra.ijpb.binary.skeleton.ImageJSkeleton;
 import inra.ijpb.data.image.Image3D;
 import inra.ijpb.data.image.Images3D;
@@ -59,13 +59,6 @@ import inra.ijpb.label.LabelImages;
  */
 public class BinaryImages 
 {
-	/**
-	 * Private constructor to prevent class instantiation.
-	 */
-	private BinaryImages()
-	{
-	}
-
 	/**
 	 * Check if input image is binary (8-bit with only 0 or 255 values)
 	 * @param image input image
@@ -138,13 +131,13 @@ public class BinaryImages
 	 *            a binary 3D image with zero values for background
 	 * @return the number of voxels with value greater than zero
 	 */
-	public static final int countForegroundVoxels(ImageStack image)
+	public static final long countForegroundVoxels(ImageStack image)
 	{
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int depth = image.getSize();
 
-		int count = 0;
+		long count = 0;
 		
 		// iterate over 3D image, using Image3D wrapper
 		Image3D image3d = Images3D.createWrapper(image);
@@ -188,79 +181,26 @@ public class BinaryImages
 			int conn, int bitDepth)
 	{
 		ImagePlus labelPlus;
-		double nLabels;
 	
 		// Dispatch processing depending on input image dimensionality
 		if (imagePlus.getStackSize() == 1)
 		{
-			ImageProcessor labels = componentsLabeling(imagePlus.getProcessor(),
-					conn, bitDepth);
-			labelPlus = new ImagePlus("Labels", labels);
-			nLabels = findMax(labels);
+		    FloodFillComponentsLabeling algo = new FloodFillComponentsLabeling(conn, bitDepth);
+		    FloodFillComponentsLabeling.Result res = algo.computeResult(imagePlus.getProcessor());
+			labelPlus = new ImagePlus("Labels", res.labelMap);
+			labelPlus.setDisplayRange(0, res.nLabels);
 		}
 		else 
 		{
-			ImageStack labels = componentsLabeling(imagePlus.getStack(), conn,
-					bitDepth);
-			labelPlus = new ImagePlus("Labels", labels);
-			nLabels = findMax(labels);
+            FloodFillComponentsLabeling3D algo = new FloodFillComponentsLabeling3D(conn, bitDepth);
+            FloodFillComponentsLabeling3D.Result res = algo.computeResult(imagePlus.getStack());
+            labelPlus = new ImagePlus("Labels", res.labelMap);
+            labelPlus.setDisplayRange(0, res.nLabels);
 		}
 
-		// setup display range to show largest label as white
-		labelPlus.setDisplayRange(0, nLabels);
 		return labelPlus;
 	}
-
-	/**
-	 * Computes maximum value in the input 2D image.
-	 * This method is used to compute display range of result ImagePlus.
-	 */
-	private final static double findMax(ImageProcessor image) 
-	{
-		// get image size
-		int sizeX = image.getWidth();
-		int sizeY = image.getHeight();
-		
-		// find maximum value over pixels
-		double maxVal = 0;
-		for (int y = 0; y < sizeY; y++) 
-		{
-			for (int x = 0; x < sizeX; x++) 
-			{
-				maxVal = Math.max(maxVal, image.getf(x, y));
-			}
-		}
-		
-		return maxVal;
-	}
-
-	/**
-	 * Computes maximum value in the input 3D image.
-	 * This method is used to compute display range of result ImagePlus.
-	 */
-	private final static double findMax(ImageStack image) 
-	{
-		// get image size
-		int sizeX = image.getWidth();
-		int sizeY = image.getHeight();
-		int sizeZ = image.getSize();
 	
-		// find maximum value over voxels
-		double maxVal = 0;
-		for (int z = 0; z < sizeZ; z++) 
-		{
-			for (int y = 0; y < sizeY; y++) 
-			{
-				for (int x = 0; x < sizeX; x++) 
-				{
-					maxVal = Math.max(maxVal, image.getVoxel(x, y, z));
-				}
-			}
-		}
-		
-		return maxVal;
-	}
-
 	/**
 	 * Computes the labels of the connected components in the given planar
 	 * binary image. The type of result is controlled by the bitDepth option.
@@ -500,6 +440,8 @@ public class BinaryImages
 	 *            the input binary image
 	 * @param chamferMask
 	 *            the chamfer mask used for propagating distances
+	 * @param floatingPoint
+	 * 		      indicates if the distane propagation should use floating point computation 
 	 * @param normalize
 	 *            indicates whether the resulting distance map should be
 	 *            normalized (divide distances by the first chamfer weight)
@@ -559,6 +501,17 @@ public class BinaryImages
 		return algo.distanceMap(image);
 	}
 	
+	/**
+	 * Computes the geodesic distance transform (or geodesic distance map) of a
+	 * binary image of marker, constrained to a binary mask. Returns the result
+	 * in a new instance of ImagePlus.
+	 * 
+	 * @param markerPlus
+	 *            the image containing the marker
+	 * @param maskPlus
+	 *            the image containing the marker
+	 * @return the geodesic distance map in a new ImagePlus
+	 */
 	public static final ImagePlus geodesicDistanceMap(ImagePlus markerPlus,
 			ImagePlus maskPlus)
 	{
@@ -612,7 +565,7 @@ public class BinaryImages
 			ImageProcessor mask, short[] weights, boolean normalize) 
 	{
 		ChamferMask2D chamferMask = ChamferMask2D.fromWeights(weights);
-		GeodesicDistanceTransform algo = new GeodesicDistanceTransformShort(chamferMask, normalize);
+		GeodesicDistanceTransform algo = new GeodesicDistanceTransformShortHybrid(chamferMask, normalize);
 		return algo.geodesicDistanceMap(marker, mask);
 	}
 	
@@ -636,7 +589,7 @@ public class BinaryImages
 			ImageProcessor mask, float[] weights, boolean normalize) 
 	{
 		ChamferMask2D chamferMask = ChamferMask2D.fromWeights(weights);
-		GeodesicDistanceTransform algo = new GeodesicDistanceTransformFloat(chamferMask, normalize);
+		GeodesicDistanceTransform algo = new GeodesicDistanceTransformFloatHybrid(chamferMask, normalize);
 		return algo.geodesicDistanceMap(marker, mask);
 	}
 	
@@ -1034,5 +987,12 @@ public class BinaryImages
     public static final ImageProcessor skeleton(ImageProcessor image) 
     {
         return new ImageJSkeleton().process(image);
+    }
+    
+    /**
+     * Private constructor to prevent class instantiation.
+     */
+    private BinaryImages()
+    {
     }
 }

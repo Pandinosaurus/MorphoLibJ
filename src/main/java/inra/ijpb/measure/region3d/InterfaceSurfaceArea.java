@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -106,15 +127,28 @@ public class InterfaceSurfaceArea
     // ==================================================
     // Constructors
 
+    /**
+     * Default empty constructor.
+     */
     public InterfaceSurfaceArea()
     {
     }
 
+    /**
+     * Constructor that specifies the number of directions to use.
+     * 
+     * @param nDirs the number of directions to use (either 3 or 13).
+     */
     public InterfaceSurfaceArea(int nDirs)
     {
         setDirectionNumber(nDirs);
     }
 
+    /**
+     * Specifies the number of directions to use.
+     * 
+     * @param nDirs the number of directions to use (either 3 or 13).
+     */
     public void setDirectionNumber(int nDirs)
     {
         if (nDirs == 3 || nDirs == 13)
@@ -127,6 +161,19 @@ public class InterfaceSurfaceArea
         }
     }
     
+    /**
+	 * Computes the interface surface area between two regions.
+	 * 
+	 * @param stack
+	 *            the 3D input image
+	 * @param label1
+	 *            the label of the first region
+	 * @param label2
+	 *            the label of the second region
+	 * @param calib
+	 *            the spatial calibration of image
+	 * @return the surface area of the interface between the two regions
+	 */
     public double process(ImageStack stack, int label1, int label2, Calibration calib)
     {
         // coordinates of voxels within tile

@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -58,6 +79,12 @@ public class ChamferMask3DW5 extends ChamferMask3D
 		this.e = (short) e;
 	}
 
+	/**
+	 * Creates a new ChamferMask3D object by specifying the weights
+	 * associated to orthogonal and diagonal neighbors.
+	 * 
+	 * @param weights the weights associated to the different types of offset
+	 */	
 	public ChamferMask3DW5(short[] weights)
 	{
 		if (weights.length != 5)

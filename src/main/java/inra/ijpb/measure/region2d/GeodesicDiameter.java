@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -75,8 +75,10 @@ import inra.ijpb.label.LabelValues.PositionValuePair;
  *}
  * </pre>
  *
+ * @see inra.ijpb.measure.region3d.GeodesicDiameter3D
  * @see inra.ijpb.binary.geodesic.GeodesicDistanceTransform
  * @see inra.ijpb.measure.region2d.GeodesicDiameter.Result
+ * @see inra.ijpb.binary.distmap.ChamferMask2D
  * 
  * @since 1.3.5
  * 
@@ -225,16 +227,33 @@ public class GeodesicDiameter extends RegionAnalyzer2D<GeodesicDiameter.Result>
 	// ==================================================
 	// Setters/Getters
 	
+	/**
+	 * Returns the value of the computePaths option.
+	 * 
+	 * @return the value of the computePaths option.
+	 */
 	public boolean getComputePaths()
 	{
 		return this.computePaths;
 	}
 	
+	/**
+	 * Updates the value of the computePahs option.
+	 * 
+	 * @param bool
+	 *            the new value of the computePahs option.
+	 */
 	public void setComputePaths(boolean bool)
 	{
 		this.computePaths = bool;
 	}
 
+	/**
+	 * Updates the value of weights.
+	 * 
+	 * @param weights
+	 *            the new value of the weights.
+	 */
 	@Deprecated
 	public void setChamferWeights(float[] weights)
 	{
@@ -303,7 +322,7 @@ public class GeodesicDiameter extends RegionAnalyzer2D<GeodesicDiameter.Result>
 	 */
 	public Result[] analyzeRegions(ImageProcessor labelImage, int[] labels, Calibration calib)
 	{
-		// Intitial check-up
+		// Initial check-up
 		if (calib.pixelWidth != calib.pixelHeight)
 		{
 			throw new RuntimeException("Requires image with square pixels");

@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -39,11 +39,19 @@ import inra.ijpb.algo.Algo;
  *}</pre>
  *
  *
- * @see inra.ijpb.binary.geodesic.GeodesicDiameter3DFloat
+ * @deprecated since 1.3.5, use inra.ijpb.measure.region3d.GeodesicDiameter3D instead 
+ * @see inra.ijpb.measure.region3d.GeodesicDiameter3D
  * 
  * @author dlegland
  */
 public interface GeodesicDiameter3D extends Algo
 {
+	/**
+	 * computes geodesic diameter for each region of the input image.
+	 * 
+	 * @param labelImage
+	 *            the label image containing regions.
+	 * @return a ResultsTable containing the geodesic diameter of each region.
+	 */
 	public abstract ResultsTable process(ImageStack labelImage);
 }

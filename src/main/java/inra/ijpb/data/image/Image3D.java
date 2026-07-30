@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -91,6 +91,13 @@ public interface Image3D
 	 */
 	public double getValue(int x, int y, int z);
 
+	/**
+	 * Returns the value at the specified coordinates as a double.
+	 * 
+	 * @param pos
+	 *            the position as a Cursor3D
+	 * @return the value at the specified position
+	 */
 	public double getValue(Cursor3D pos);
 
 	/**
@@ -108,5 +115,14 @@ public interface Image3D
 	 */
 	public void setValue(int x, int y, int z, double value);
 	
+	/**
+	 * Changes the value at the specified coordinates, using a double to
+	 * specify the new value.
+	 * 
+	 * @param pos
+	 *            the position of the voxel
+	 * @param value
+	 *            the new value at the specified position
+	 */
 	public void setValue(Cursor3D pos, double  value);
 }

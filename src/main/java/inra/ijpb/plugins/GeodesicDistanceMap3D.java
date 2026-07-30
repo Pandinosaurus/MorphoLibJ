@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -42,9 +42,11 @@ import java.awt.image.IndexColorModel;
  * Plugin for computing geodesic distance map from binary images using chamfer
  * weights.
  * 
+ * @deprecated use GeodesicDistanceMap3DPlugin instead
  * @author dlegland
  *
  */
+@Deprecated
 public class GeodesicDistanceMap3D implements PlugIn
 {
 	/*
@@ -53,6 +55,7 @@ public class GeodesicDistanceMap3D implements PlugIn
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
+	@Deprecated
 	public void run(String arg0)
 	{
 		// Open a dialog to choose:
@@ -131,7 +134,7 @@ public class GeodesicDistanceMap3D implements PlugIn
 	 *            the binary mask image that will constrain the propagation
 	 * @param newName
 	 *            the name of the result image
-	 * @param weights
+	 * @param chamferMask
 	 *            the set of chamfer weights for computing distances
 	 * @param normalize
 	 *            specifies whether the resulting distance map should be
@@ -139,6 +142,7 @@ public class GeodesicDistanceMap3D implements PlugIn
 	 * @return an array of object, containing the name of the new image, and the
 	 *         new ImagePlus instance
 	 */
+	@Deprecated
 	public ImagePlus process(ImagePlus marker, ImagePlus mask, String newName,
 			ChamferMask3D chamferMask, boolean normalize)
 	{

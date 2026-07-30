@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -67,7 +67,7 @@ DialogListener
 
 	private static int dynamic = 1;
 	private static String connLabel = Conn2D.C4.label;
-	private static String maskLabel = ChamferMask2D.BORGEFORS.toString();
+	private static String maskLabel = ChamferMask2D.CHESSKNIGHT.toString();
 
 	private int connectivity = 4;
 

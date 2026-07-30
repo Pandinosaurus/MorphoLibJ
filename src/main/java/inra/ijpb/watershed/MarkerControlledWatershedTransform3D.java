@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -555,7 +555,7 @@ public class MarkerControlledWatershedTransform3D extends WatershedTransform3D
 												+ cDist2cur ) );
       						}
 						}
-						else if ( tabLabels[u][v][w] > 0 &&
+						else if ( tabLabels[u][v][w] > 0 && maskStack.getVoxel( u, v, w ) > 0 &&
 								! neighborLabels.contains(
 										tabLabels[ u ][ v ][ w ] ) )
 						{
@@ -572,8 +572,14 @@ public class MarkerControlledWatershedTransform3D extends WatershedTransform3D
 					// now that we know the voxel is labeled, add neighbors to list
 					for( VoxelRecord v : neighborVoxels )
 					{
-						tabLabels[ v.getCursor().getX() ][ v.getCursor().getY() ][ v.getCursor().getZ() ] = INQUEUE;
-						voxelList.add( v );
+						final int x = v.getCursor().getX();
+						final int y = v.getCursor().getY();
+						final int z = v.getCursor().getZ();
+						if ( maskStack.getVoxel( x, y, z ) > 0 )
+						{
+							tabLabels[ x ][ y ][ z ] = INQUEUE;
+							voxelList.add( v );
+						}
 					}
 				}
 			}
@@ -1050,6 +1056,7 @@ public class MarkerControlledWatershedTransform3D extends WatershedTransform3D
 									if ( u >= 0 && u < size1 && 
 											v >= 0 && v < size2 && 
 											w >= 0 && w < size3 &&
+											ipMask.getf( u, v ) > 0 &&
 											(int) seedStack.getVoxel( u, v, w ) == 0 &&
 											tabLabels[ u ][ v ][ w ] != INQUEUE )															 
 									{

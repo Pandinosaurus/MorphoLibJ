@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -34,8 +34,10 @@ import inra.ijpb.binary.distmap.ChamferMask2D;
 import inra.ijpb.binary.distmap.ChamferMasks2D;
 import inra.ijpb.binary.geodesic.GeodesicDistanceTransform;
 import inra.ijpb.binary.geodesic.GeodesicDistanceTransformFloat;
-import inra.ijpb.binary.geodesic.GeodesicDistanceTransformShort;
+import inra.ijpb.binary.geodesic.GeodesicDistanceTransformFloatHybrid;
+import inra.ijpb.binary.geodesic.GeodesicDistanceTransformShortHybrid;
 import inra.ijpb.color.ColorMaps;
+import inra.ijpb.util.IJUtils;
 
 import java.awt.image.IndexColorModel;
 
@@ -56,29 +58,22 @@ public class GeodesicDistanceMapPlugin implements PlugIn
 	@Override
 	public void run(String arg0)
 	{
+        // create the list of image names
+        String[] imageNames = IJUtils.getOpenImageNames();
+        if (imageNames.length == 0)
+        {
+            IJ.error("No image", "Need at least one image to work");
+            return;
+        }
+        String currentImageName = IJ.getImage().getTitle();
+
 		// Open a dialog to choose:
 		// - marker image
 		// - mask image
 		// - set of weights
-		int[] indices = WindowManager.getIDList();
-		if (indices == null)
-		{
-			IJ.error("No image", "Need at least one image to work");
-			return;
-		}
-
-		// create the list of image names
-		String[] imageNames = new String[indices.length];
-		for (int i = 0; i < indices.length; i++)
-		{
-			imageNames[i] = WindowManager.getImage(indices[i]).getTitle();
-		}
-
-		// create the dialog
 		GenericDialog gd = new GenericDialog("Geodesic Distance Map");
-
-		gd.addChoice("Marker Image", imageNames, IJ.getImage().getTitle());
-		gd.addChoice("Mask Image", imageNames, IJ.getImage().getTitle());
+		gd.addChoice("Marker Image", imageNames, currentImageName);
+		gd.addChoice("Mask Image", imageNames, currentImageName);
 		// Set Chessknight weights as default
 		gd.addChoice("Distances", ChamferMasks2D.getAllLabels(),
 				ChamferMasks2D.CHESSKNIGHT.toString());
@@ -117,12 +112,31 @@ public class GeodesicDistanceMapPlugin implements PlugIn
 
 		// Execute core of the plugin
 		String newName = createResultImageName(maskImage);
+        long t0 = System.currentTimeMillis();
 		ImagePlus res = process(markerImage, maskImage, newName,
 				weights, resultAsFloat, normalizeWeights);
+        long t1 = System.currentTimeMillis();
 
 		res.show();
+		
+        // Display elapsed time
+        IJUtils.showElapsedTime("distance map", t1 - t0, markerImage);
 	}
 
+	/**
+	 * Computes the distance within the mask, starting from the marker image.
+	 * 
+	 * @param marker
+	 *            the binary marker image from which distances will be
+	 *            propagated
+	 * @param mask
+	 *            the binary mask image that will constrain the propagation
+	 * @param newName
+	 *            the name of the result image
+	 * @param weights
+	 *            the set of chamfer weights for computing distances
+	 * @return the geodesic distance map
+	 */
 	@Deprecated
 	public Object[] exec(ImagePlus marker, ImagePlus mask, String newName,
 			float[] weights)
@@ -320,6 +334,21 @@ public class GeodesicDistanceMapPlugin implements PlugIn
 		return resultPlus;
 	}
 
+	/**
+	 * Computes the distance within the mask, starting from the marker image.
+	 * 
+	 * @param marker
+	 *            the binary marker image from which distances will be
+	 *            propagated
+	 * @param mask
+	 *            the binary mask image that will constrain the propagation
+	 * @param weights
+	 *            the set of chamfer weights for computing distances
+	 * @param normalize
+	 *            specifies whether the resulting distance map should be
+	 *            normalized
+	 * @return the geodesic distance map
+	 */
 	@Deprecated
 	public ImageProcessor process(ImageProcessor marker, ImageProcessor mask,
 			float[] weights, boolean normalize)
@@ -365,6 +394,8 @@ public class GeodesicDistanceMapPlugin implements PlugIn
 	 *            the name of the result image
 	 * @param weights
 	 *            the set of chamfer weights for computing distances
+	 * @param floatComputation
+	 *            specifies whether floating point computation should be used
 	 * @param normalize
 	 *            specifies whether the resulting distance map should be
 	 *            normalized
@@ -406,11 +437,11 @@ public class GeodesicDistanceMapPlugin implements PlugIn
 		GeodesicDistanceTransform algo;
 		if (floatComputation)
 		{
-			algo = new GeodesicDistanceTransformFloat(weights, normalize);
+			algo = new GeodesicDistanceTransformFloatHybrid(weights, normalize);
 		}
 		else
 		{
-			algo = new GeodesicDistanceTransformShort(weights, normalize);
+            algo = new GeodesicDistanceTransformShortHybrid(weights, normalize);
 		}
 
 		DefaultAlgoListener.monitor(algo);

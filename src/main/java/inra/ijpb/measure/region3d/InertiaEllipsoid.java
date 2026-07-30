@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -47,6 +68,7 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
 	 * @return an array of Ellipsoid instances representing the calibrated
 	 *         coordinates of the inertia ellipsoid of each region
 	 */
+	@Deprecated
 	public static final Ellipsoid[] inertiaEllipsoids(ImageStack image, int[] labels, Calibration calib)
 	{
 		return new InertiaEllipsoid().analyzeRegions(image, labels, calib);
@@ -59,6 +81,7 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
 	/**
 	 * Default constructor
 	 */
+	@Deprecated
 	public InertiaEllipsoid()
 	{
 	}
@@ -75,6 +98,7 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
 	 *            the mapping between labels and Inertia Ellipsoids
 	 * @return a ResultsTable that can be displayed with ImageJ.
 	 */
+	@Deprecated
 	public ResultsTable createTable(Map<Integer, Ellipsoid> map)
 	{
 		// Initialize a new result table
@@ -123,6 +147,7 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
 	 * @return an array of Ellipsoid instances representing the calibrated
 	 *         coordinates of the inertia ellipsoid of each region
 	 */
+	@Deprecated
 	public Ellipsoid[] analyzeRegions(ImageStack image, int[] labels, Calibration calib)
 	{
         // check if JAMA package is present
@@ -165,6 +190,19 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
 		return ellipsoids;
 	}
 	
+	/**
+	 * Computes the matrix of moments for each region within the 3D label map.
+	 * 
+	 * @param image
+	 *            the 3D image of labels (label map)
+	 * @param labels
+	 *            the array of region labels to process
+	 * @param calib
+	 *            the spatial calibration of the image
+	 * @return an array the same size as <code>labels</code>, containing for
+	 *         each processed region result of 3D Moments computations
+	 */
+	@Deprecated
 	public InertiaMoments3D[] computeMoments(ImageStack image, int[] labels, Calibration calib)
 	{
 	    // size of image
@@ -303,25 +341,45 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
         return moments;
 	}
 
+	/**
+	 * Inner class for storing result if moments computation.
+	 */
+	@Deprecated
 	public class InertiaMoments3D
 	{
 	    // the number of voxels 
+		@Deprecated
 	    int count = 0;
 	    
 	    // The coordinates of the center
+		@Deprecated
         double cx = 0;
+		@Deprecated
         double cy = 0;
+		@Deprecated
         double cz = 0;
         
         // the second-order coefficients
+		@Deprecated
         double Ixx = 0;
+		@Deprecated
         double Ixy = 0;
+		@Deprecated
         double Ixz = 0;
+		@Deprecated
         double Iyy = 0;
+		@Deprecated
         double Iyz = 0;
+		@Deprecated
         double Izz = 0;
         
-        public Ellipsoid equivalentEllipsoid()
+        /**
+		 * Computes ellipsoid with same moments as those stored in this class.
+		 * 
+		 * @return the equivalent ellipsoid with same moments.
+		 */
+		@Deprecated
+       public Ellipsoid equivalentEllipsoid()
         {
             // Extract singular values
             SingularValueDecomposition svd = computeSVD();
@@ -357,6 +415,11 @@ public class InertiaEllipsoid extends RegionAnalyzer3D<Ellipsoid>
             return new Ellipsoid(this.cx, this.cy, this.cz, r1, r2, r3, toDegrees(phi), toDegrees(theta), toDegrees(psi));
         }
 
+		/**
+		 * @return The eigen vectors of the moment matrix, as an ArrayList of
+		 *         Vector3D with three elements.
+		 */
+		@Deprecated
         public ArrayList<Vector3D> eigenVectors()
         {
             // Extract singular values

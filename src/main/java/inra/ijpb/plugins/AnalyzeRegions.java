@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,75 +22,124 @@
 package inra.ijpb.plugins;
 
 
-import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import inra.ijpb.algo.DefaultAlgoListener;
-import inra.ijpb.geometry.Box2D;
-import inra.ijpb.geometry.Circle2D;
-import inra.ijpb.geometry.Ellipse;
-import inra.ijpb.geometry.OrientedBox2D;
-import inra.ijpb.geometry.PointPair2D;
 import inra.ijpb.label.LabelImages;
-import inra.ijpb.measure.region2d.AverageThickness;
-import inra.ijpb.measure.region2d.BoundingBox;
-import inra.ijpb.measure.region2d.Centroid;
-//import inra.ijpb.measure.IntrinsicVolumes2D;
-import inra.ijpb.measure.region2d.Convexity;
-import inra.ijpb.measure.region2d.GeodesicDiameter;
-import inra.ijpb.measure.region2d.EquivalentEllipse;
-import inra.ijpb.measure.region2d.IntrinsicVolumes2DUtils;
-import inra.ijpb.measure.region2d.IntrinsicVolumesAnalyzer2D;
-import inra.ijpb.measure.region2d.LargestInscribedCircle;
-import inra.ijpb.measure.region2d.MaxFeretDiameter;
-import inra.ijpb.measure.region2d.OrientedBoundingBox2D;
+import inra.ijpb.measure.region2d.MorphometricFeatures2D;
+import inra.ijpb.measure.region2d.MorphometricFeatures2D.Feature;
 
+/**
+ * Plugin for computing morphological feature of regions from label images.
+ * 
+ * For programmatic use, it is advised to use the
+ * <code>MorphometricFeatures2D</code> class:
+ * <pre>{@code
+ * ResultsTable table = new MorphometricFeatures2D()
+ *     .add(Feature.AREA)
+ *     .add(Feature.PERIMETER)
+ *     .add(Feature.CENTROID)
+ *     .computeTable(imagePlus);
+ * }
+ *  </pre>
+ * 
+ * see inra.ijpb.measure.region2d.MorphometricFeatures2D
+ */
 public class AnalyzeRegions implements PlugInFilter 
 {
     // ====================================================
-    // Global Constants
+    // Static methods
     
-	boolean computePixelCount = false;
-	boolean computeArea = true;
-	boolean computePerimeter = true;
-	boolean computeCircularity = true;
-	boolean computeEulerNumber = true;
-	boolean computeBoundingBox  = true;
-    boolean computeCentroid = true;
-    boolean computeEquivalentEllipse = true;
-	boolean computeEllipseElongation = true;
-	boolean computeConvexity = true;
-	boolean computeMaxFeretDiameter = true;
-	boolean computeOrientedBox = true;
-	boolean computeOrientedBoxElongation = true;
-	boolean computeGeodesicDiameter = true;
-	boolean computeTortuosity = true;
-	boolean computeMaxInscribedDisc = true;
-    boolean computeAverageThickness = true;
-	boolean computeGeodesicElongation = true;
-	
+	/**
+     * Computes a set of descriptive features from a label image and
+     * concatenates the results into a ResultsTable.
+     * 
+     * @deprecated replaced by MorphometricFeatures2D
+     * 
+     * @param imagePlus
+     *            the image to analyze.
+     * @param features
+     *            the features to compute.
+     * @return the results of the analysis as a Results Table
+     */
+    @Deprecated
+    public static final ResultsTable process(ImagePlus imagePlus, Features features)
+    {
+        // convert inner Features class into a MorphometricFeatures2D instance
+        MorphometricFeatures2D morpho = new MorphometricFeatures2D();
+        if (features.pixelCount) morpho.add(Feature.PIXEL_COUNT);
+        if (features.area) morpho.add(Feature.AREA);
+        if (features.perimeter) morpho.add(Feature.PERIMETER);
+        if (features.circularity) morpho.add(Feature.CIRCULARITY);
+        if (features.eulerNumber) morpho.add(Feature.EULER_NUMBER);
+        if (features.boundingBox) morpho.add(Feature.BOUNDING_BOX);
+        if (features.centroid) morpho.add(Feature.CENTROID);
+        if (features.equivalentEllipse) morpho.add(Feature.EQUIVALENT_ELLIPSE);
+        if (features.ellipseElongation) morpho.add(Feature.ELLIPSE_ELONGATION);
+        if (features.convexity) morpho.add(Feature.CONVEXITY);
+        if (features.maxFeretDiameter) morpho.add(Feature.MAX_FERET_DIAMETER);
+        if (features.orientedBox) morpho.add(Feature.ORIENTED_BOX);
+        if (features.orientedBoxElongation) morpho.add(Feature.ORIENTED_BOX_ELONGATION);
+        if (features.geodesicDiameter) morpho.add(Feature.GEODESIC_DIAMETER);
+        if (features.tortuosity) morpho.add(Feature.TORTUOSITY);
+        if (features.maxInscribedDisc) morpho.add(Feature.MAX_INSCRIBED_DISK);
+        if (features.averageThickness) morpho.add(Feature.AVERAGE_THICKNESS);
+        if (features.geodesicElongation) morpho.add(Feature.GEODESIC_ELONGATION);
+        
+        return morpho.computeTable(imagePlus);
+    }
+    
+    
+	// ====================================================
+	// Class variables
+
+	static final List<Feature> featureList;
+	static
+	{
+		// initializes the list of features that will populate the GUI,
+		// in the order they will be displayed
+		featureList = new ArrayList<>();
+		featureList.add(Feature.PIXEL_COUNT);
+		featureList.add(null);
+		featureList.add(Feature.AREA);
+		featureList.add(Feature.PERIMETER);
+		featureList.add(Feature.CIRCULARITY);
+		featureList.add(Feature.EULER_NUMBER);
+		featureList.add(Feature.BOUNDING_BOX);
+		featureList.add(Feature.CENTROID);
+		featureList.add(Feature.EQUIVALENT_ELLIPSE);
+		featureList.add(Feature.ELLIPSE_ELONGATION);
+		featureList.add(Feature.CONVEXITY);
+		featureList.add(Feature.MAX_FERET_DIAMETER);
+		featureList.add(Feature.ORIENTED_BOX);
+		featureList.add(Feature.ORIENTED_BOX_ELONGATION);
+		featureList.add(Feature.GEODESIC_DIAMETER);
+		featureList.add(Feature.TORTUOSITY);
+		featureList.add(Feature.MAX_INSCRIBED_DISK);
+		featureList.add(Feature.GEODESIC_ELONGATION);
+		featureList.add(Feature.AVERAGE_THICKNESS);
+	}
+
+	/**
+	 * The instance of Morphometry2D that will compute the features. As it is
+	 * static, it will keep chosen features when plugin is run again.
+	 */
+	static MorphometricFeatures2D features = null;
+
+	/**
+	 * The image to work on.
+	 */
+	ImagePlus imagePlus;
 
     // ====================================================
-    // Class variables
-    
-   /**
-     * When this options is set to true, information messages are displayed on
-     * the console, and the number of counts for each direction is included in
-     * results table. 
-     */
-    public boolean debug  = false;
-    
-	ImagePlus imagePlus;
-	
-    
-    // ====================================================
-    // Calling functions 
+    // Implementation of Plugin and PluginFilter interface 
     
 	/* (non-Javadoc)
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
@@ -103,8 +152,22 @@ public class AnalyzeRegions implements PlugInFilter
 			IJ.noImage();
 			return DONE;
 		}
-
-		this.imagePlus = imp;
+        this.imagePlus = imp;
+        
+        // initialize MorphometricFeatures2D instance if necessary
+        if (AnalyzeRegions.features == null)
+        {
+            AnalyzeRegions.features = new MorphometricFeatures2D(
+                    Feature.AREA, Feature.PERIMETER, Feature.EULER_NUMBER, Feature.CIRCULARITY,
+                    Feature.BOUNDING_BOX, 
+                    Feature.CENTROID, Feature.EQUIVALENT_ELLIPSE, Feature.ELLIPSE_ELONGATION, 
+                    Feature.CONVEXITY, Feature.MAX_FERET_DIAMETER, 
+                    Feature.ORIENTED_BOX, Feature.ORIENTED_BOX_ELONGATION, 
+                    Feature.GEODESIC_DIAMETER, Feature.TORTUOSITY, 
+                    Feature.AVERAGE_THICKNESS, 
+                    Feature.MAX_INSCRIBED_DISK, Feature.GEODESIC_ELONGATION 
+                    );
+        }
 		return DOES_ALL | NO_CHANGES;
 	}
 
@@ -122,372 +185,176 @@ public class AnalyzeRegions implements PlugInFilter
         }
 
         // create the dialog, with operator options
-        GenericDialog gd = new GenericDialog("Analyze Regions");
-        gd.addCheckbox("Pixel_Count", false);
-        gd.addCheckbox("Area", true);
-        gd.addCheckbox("Perimeter", true);
-        gd.addCheckbox("Circularity", true);
-        gd.addCheckbox("Euler_Number", true);
-        gd.addCheckbox("Bounding_Box", true);
-        gd.addCheckbox("Centroid", true);
-        gd.addCheckbox("Equivalent_Ellipse", true);
-        gd.addCheckbox("Ellipse_Elong.", true);
-        gd.addCheckbox("Convexity", true);
-        gd.addCheckbox("Max._Feret Diameter", true);
-        gd.addCheckbox("Oriented_Box", true);
-        gd.addCheckbox("Oriented_Box_Elong.", true);
-        gd.addCheckbox("Geodesic Diameter", true);
-        gd.addCheckbox("Tortuosity", true);
-        gd.addCheckbox("Max._Inscribed_Disc", true);
-        gd.addCheckbox("Average_Thickness", true);
-        gd.addCheckbox("Geodesic_Elong.", true);
-        gd.showDialog();
-        
-        // If cancel was clicked, do nothing
-        if (gd.wasCanceled())
+		MorphometricFeatures2D morphoFeatures = chooseFeatures(AnalyzeRegions.features);
+        // If cancel was clicked, features is null
+        if (morphoFeatures == null)
+        {
             return;
-
-        // Extract features to extract from image
-        computePixelCount         = gd.getNextBoolean();
-        computeArea               = gd.getNextBoolean();
-        computePerimeter          = gd.getNextBoolean();
-        computeCircularity        = gd.getNextBoolean();
-        computeEulerNumber        = gd.getNextBoolean();
-        computeBoundingBox        = gd.getNextBoolean();
-        computeCentroid           = gd.getNextBoolean();
-        computeEquivalentEllipse  = gd.getNextBoolean();
-        computeEllipseElongation  = gd.getNextBoolean();
-        computeConvexity          = gd.getNextBoolean();
-        computeMaxFeretDiameter   = gd.getNextBoolean();
-        computeOrientedBox   	  = gd.getNextBoolean();
-        computeOrientedBoxElongation = gd.getNextBoolean();
-        computeGeodesicDiameter   = gd.getNextBoolean();
-        computeTortuosity         = gd.getNextBoolean();
-        computeMaxInscribedDisc   = gd.getNextBoolean();
-        computeAverageThickness   = gd.getNextBoolean();
-        computeGeodesicElongation = gd.getNextBoolean();
+        }
         
-        
-        // Execute the plugin
-        ResultsTable table = process(imagePlus);
+        // Call the main processing method
+        DefaultAlgoListener.monitor(morphoFeatures);
+        ResultsTable table = morphoFeatures.computeTable(imagePlus);
         
         // show result
-		String tableName = imagePlus.getShortTitle() + "-Morphometry"; 
-		table.show(tableName);
+        String tableName = imagePlus.getShortTitle() + "-Morphometry";
+        table.show(tableName);
+        
+        // keep choices for next plugin call
+        AnalyzeRegions.features = morphoFeatures;
     }
     
+    private static final MorphometricFeatures2D chooseFeatures(MorphometricFeatures2D initialChoice)
+	{
+		if (initialChoice == null)
+		{
+			initialChoice = new MorphometricFeatures2D();
+		}
+
+		// initialize the data for populating GUI
+		int nf = featureList.size();
+		String[] labels = new String[nf];
+		boolean[] states = new boolean[nf];
+		for (int i = 0; i < featureList.size(); i++)
+		{
+			Feature feature = featureList.get(i);
+			labels[i] = feature != null ? feature.toString() : null;
+			states[i] = initialChoice.contains(featureList.get(i));
+		}
+
+		// create dialog for choosing features
+		GenericDialog gd = new GenericDialog("Analyze Regions");
+		gd.addCheckboxGroup(labels.length / 2 + 1, 2, labels, states, new String[] { "Features" });
+		gd.showDialog();
+
+		// If cancel was clicked, return null to avoid computation
+		if (gd.wasCanceled())
+		{ return null; }
+
+		// Extract features to quantify from image
+		MorphometricFeatures2D features = new MorphometricFeatures2D();
+		for (Feature feature : featureList)
+		{
+			if (feature != null)
+			{
+				if (gd.getNextBoolean()) features.add(feature);
+			}
+		}
+
+		return features;
+	}
+
+    /**
+     * Process the input image.
+     * 
+     * @deprecated replaced by static process(ImagePlus, Features) method
+     * 
+     * @param imagePlus
+     *            the image to process
+     * @return a ResultsTable summarizing the features
+     */
+    @Deprecated
     public ResultsTable process(ImagePlus imagePlus)
     {
-    	ImageProcessor image = imagePlus.getProcessor();
-        // Extract spatial calibration
-        Calibration calib = imagePlus.getCalibration();
-
-		int[] labels = LabelImages.findAllLabels(image);
-		int nLabels = labels.length;
-
-		// create results table with appropriate labels
-    	ResultsTable table = new ResultsTable();
-    	for (int i = 0; i < nLabels; i++)
-    	{
-    		table.incrementCounter();
-    		table.addLabel("" + labels[i]);
-    	}
-    	
-    	// Parameters to be computed
-    	int[] pixelCounts = null;
-    	IntrinsicVolumesAnalyzer2D.Result[] intrinsicVolumes = null; 
-        Box2D[] boundingBoxes = null;
-    	Point2D[] centroids = null;
-    	Ellipse[] ellipses = null;
-    	Convexity.Result[] convexities = null;
-    	PointPair2D[] maxFeretDiams = null;
-    	OrientedBox2D[] orientedBoxes = null;
-    	GeodesicDiameter.Result[] geodDiams = null;
-    	Circle2D[] inscrDiscs = null;
-    	AverageThickness.Result[] avgThickness = null;
-    	
-
-    	// compute intrinsic volumes
-    	if (computePixelCount)
-    	{
-    	    IJ.showStatus("Pixel Count");
-    	    pixelCounts = LabelImages.pixelCount(image, labels); 
-    	}
-    	
-    	// compute intrinsic volumes
-    	if (computeArea || computePerimeter || computeEulerNumber || computeCircularity)
-    	{
-    	    IJ.showStatus("Intrinsic Volumes");
-    	    
-    	    // Create and setup computation class
-            IntrinsicVolumesAnalyzer2D algo = new IntrinsicVolumesAnalyzer2D();
-            algo.setDirectionNumber(4);
-            algo.setConnectivity(4);
-            DefaultAlgoListener.monitor(algo);
-            
-            // run analysis
-            intrinsicVolumes = algo.analyzeRegions(image, labels, calib); 
-    	}
-    	
-        if (computeBoundingBox)
-        {
-            IJ.showStatus("Compute bounding boxes");
-            BoundingBox algo = new BoundingBox();
-            DefaultAlgoListener.monitor(algo);
-            boundingBoxes = algo.analyzeRegions(image, labels, calib);
-        }
-
-        if (computeEquivalentEllipse || computeEllipseElongation)
-    	{
-    		IJ.showStatus("Equivalent Ellipse");
-    		EquivalentEllipse algo = new EquivalentEllipse();
-    		DefaultAlgoListener.monitor(algo);
-    		ellipses = algo.analyzeRegions(image, labels, calib);
-    		
-    		if (computeCentroid)
-    		{
-    		    centroids = Ellipse.centers(ellipses);
-    		}
-    	}
-        else if (computeCentroid)
-        {
-            // Compute centroids if not already computed from inertia ellipsoid
-            IJ.showStatus("Centroids");
-            Centroid algo = new Centroid();
-            DefaultAlgoListener.monitor(algo);
-            centroids = algo.analyzeRegions(image, labels, calib);
-        }
-
-    	if (computeConvexity)
-    	{
-    		IJ.showStatus("Compute convexity");
-    		Convexity algo = new Convexity();
-    		DefaultAlgoListener.monitor(algo);
-    		convexities = algo.analyzeRegions(image, labels, calib);
-    	}
-
-    	if (computeMaxFeretDiameter || computeTortuosity)
-    	{
-    		IJ.showStatus("Max Feret Diameters");
-    		maxFeretDiams = MaxFeretDiameter.maxFeretDiameters(image, labels, calib);
-    	}
-
-    	if (computeOrientedBox)
-    	{
-    		IJ.showStatus("Oriented Bounding Boxes");
-    		OrientedBoundingBox2D algo = new OrientedBoundingBox2D();
-    		DefaultAlgoListener.monitor(algo);
-    		orientedBoxes = algo.analyzeRegions(image, labels, calib);
-    	}
-    	
-    	if (computeGeodesicDiameter || computeTortuosity)
-    	{
-            IJ.showStatus("Compute Geodesic diameters");
-    		GeodesicDiameter algo = new GeodesicDiameter();
-    		DefaultAlgoListener.monitor(algo);
-    		geodDiams = algo.analyzeRegions(image, labels, calib);
-    	}
-
-    	if (computeMaxInscribedDisc || computeGeodesicElongation)
-    	{
-    	    IJ.showStatus("Compute Inscribed circles");
-            LargestInscribedCircle algo = new LargestInscribedCircle();
-    		DefaultAlgoListener.monitor(algo);
-    		inscrDiscs = algo.analyzeRegions(image, labels, calib);
-    	}
-
-        if (computeAverageThickness)
-        {
-            IJ.showStatus("Compute Average Thickness");
-            AverageThickness algo = new AverageThickness();
-            DefaultAlgoListener.monitor(algo);
-            avgThickness = algo.analyzeRegions(image, labels, calib);
-        }
-        
-    	// Fill results table
-    	
-        IJ.showStatus("Populate table");
-        
-        if (computePixelCount)
-        {
-        	addColumnToTable(table, "PixelCount", pixelCounts);
-        }
-        
-        if (computeArea)
-        {
-            for (int i = 0; i < nLabels; i++)
-            {
-                table.setValue("Area", i, intrinsicVolumes[i].area);
-            }
-        }
-        
-        if (computePerimeter)
-        {
-            for (int i = 0; i < nLabels; i++)
-            {
-                table.setValue("Perimeter", i, intrinsicVolumes[i].perimeter);
-            }
-        }
-        
-    	if (computeCircularity)
-    	{
-    		double[] circularities = IntrinsicVolumes2DUtils.computeCircularities(intrinsicVolumes);
-    		addColumnToTable(table, "Circularity", circularities);
-    	}
-
-    	if (computeEulerNumber)
-    	{
-            for (int i = 0; i < nLabels; i++)
-            {
-                table.setValue("EulerNumber", i, intrinsicVolumes[i].eulerNumber);
-            }
-    	}
-
-        if (computeBoundingBox)
-        {
-            for (int i = 0; i < nLabels; i++)
-            {
-                Box2D box = boundingBoxes[i];
-                table.setValue("Box.X.Min", i, box.getXMin());
-                table.setValue("Box.X.Max", i, box.getXMax());
-                table.setValue("Box.Y.Min", i, box.getYMin());
-                table.setValue("Box.Y.Max", i, box.getYMax());
-            }
-        }
-        
-        if (computeCentroid)
-        {
-            for (int i = 0; i < nLabels; i++)
-            {
-                Point2D center = centroids[i];
-                table.setValue("Centroid.X", i, center.getX());
-                table.setValue("Centroid.Y", i, center.getY());
-            }
-        }
-
-        if (computeEquivalentEllipse)
-    	{
-			for (int i = 0; i < nLabels; i++)
-			{
-				Ellipse elli = ellipses[i];
-				Point2D center = elli.center();
-				table.setValue("Ellipse.Center.X", i, center.getX());
-				table.setValue("Ellipse.Center.Y", i, center.getY());
-				table.setValue("Ellipse.Radius1", i, elli.radius1());
-				table.setValue("Ellipse.Radius2", i, elli.radius2());
-				table.setValue("Ellipse.Orientation", i, elli.orientation());
-			}
-    	}
-
-		if (computeEllipseElongation)
-		{
-			double[] elong = new double[nLabels];
-			for (int i = 0; i < nLabels; i++)
-			{
-				Ellipse elli = ellipses[i];
-				elong[i] = elli.radius1() / elli.radius2();
-			}
-			addColumnToTable(table, "Ellipse.Elong", elong);
-		}
-
-		if (computeConvexity)
-		{
-			for (int i = 0; i < nLabels; i++)
-			{
-				table.setValue("ConvexArea", i, convexities[i].convexArea);
-				table.setValue("Convexity", i, convexities[i].convexity);
-			}
-		}
-
-		if (computeMaxFeretDiameter)
-		{
-			for (int i = 0; i < nLabels; i++)
-			{
-				table.setValue("MaxFeretDiam", i, maxFeretDiams[i].diameter());
-				table.setValue("MaxFeretDiamAngle", i, Math.toDegrees(maxFeretDiams[i].angle()));
-			}
-		}
-		
-    	if (computeOrientedBox)
-    	{
-			for (int i = 0; i < nLabels; i++)
-			{
-				OrientedBox2D obox = orientedBoxes[i];
-				Point2D center = obox.center();
-				table.setValue("OBox.Center.X", i, center.getX());
-				table.setValue("OBox.Center.Y", i, center.getY());
-				table.setValue("OBox.Length", i, obox.length());
-				table.setValue("OBox.Width", i, obox.width());
-				table.setValue("OBox.Orientation", i, obox.orientation());
-			}
-    	}
-
-		if (computeGeodesicDiameter)
-		{
-			for (int i = 0; i < nLabels; i++)
-			{
-				GeodesicDiameter.Result result = geodDiams[i];
-				table.setValue("GeodesicDiameter", i, result.diameter);
-			}
-		}
-
-		if (computeTortuosity)
-    	{
-    		double[] tortuosity = new double[nLabels];
-			for (int i = 0; i < nLabels; i++)
-			{
-				tortuosity[i] = geodDiams[i].diameter / maxFeretDiams[i].diameter();
-			}
-			addColumnToTable(table, "Tortuosity", tortuosity);
-    	}
-    	
-    	if (computeMaxInscribedDisc)
-    	{
-    		for (int i = 0; i < nLabels; i++)
-			{
-    			Point2D center = inscrDiscs[i].getCenter();
-				table.setValue("InscrDisc.Center.X", i, center.getX());
-				table.setValue("InscrDisc.Center.Y", i, center.getY());
-				table.setValue("InscrDisc.Radius", i, inscrDiscs[i].getRadius());
-			}
-    	}
-
-    	if (computeAverageThickness)
-    	{
-            for (int i = 0; i < nLabels; i++)
-            {
-                AverageThickness.Result res = avgThickness[i];
-                table.setValue("AverageThickness", i, res.avgThickness);
-            }
-    	}
-    	
-    	if (computeGeodesicElongation)
-    	{
-    		double[] elong = new double[nLabels];
-			for (int i = 0; i < nLabels; i++)
-			{
-				elong[i] = geodDiams[i].diameter / (inscrDiscs[i].getRadius() * 2);
-			}
-			addColumnToTable(table, "GeodesicElongation", elong);
-    	}
-    	    	
-        IJ.showStatus("");
-    	return table;
+        return process(imagePlus, new Features());
     }
+    
+    
+    // ====================================================
+    // Inner classes
+    
+    /**
+     * The list of features to compute.
+     * 
+     * Default initialization is to compute everything except the pixel count.
+     * 
+     * @deprecated replaced by MorphometricFeatures2D
+     */
+    @Deprecated
+    public static final class Features
+    {
+        /** The boolean flag for computing pixel count.*/
+        @Deprecated
+		public boolean pixelCount = false;
+        /** The boolean flag for computing area.*/
+        @Deprecated
+        public boolean area = true;
+        /** The boolean flag for computing perimeter.*/
+        @Deprecated
+        public boolean perimeter = true;
+        /** The boolean flag for computing circularity.*/
+        @Deprecated
+        public boolean circularity = true;
+        /** The boolean flag for computing Euler number.*/
+        @Deprecated
+        public boolean eulerNumber = true;
+        /** The boolean flag for computing bounding box.*/
+        @Deprecated
+        public boolean boundingBox = true;
+        /** The boolean flag for computing centroid.*/
+        @Deprecated
+        public boolean centroid = true;
+        /** The boolean flag for computing equivalent ellipse.*/
+        @Deprecated
+        public boolean equivalentEllipse = true;
+        /** The boolean flag for computing ellipse elongation.*/
+        @Deprecated
+        public boolean ellipseElongation = true;
+        /** The boolean flag for computing convexity.*/
+        @Deprecated
+        public boolean convexity = true;
+        /** The boolean flag for computing maximum Feret diameter.*/
+        @Deprecated
+        public boolean maxFeretDiameter = true;
+        /** The boolean flag for computing oriented box.*/
+        @Deprecated
+        public boolean orientedBox = true;
+        /** The boolean flag for computing elongation of oriented box.*/
+        @Deprecated
+        public boolean orientedBoxElongation = true;
+        /** The boolean flag for computing geodesic diameter.*/
+        @Deprecated
+        public boolean geodesicDiameter = true;
+        /** The boolean flag for computing tortuosity.*/
+        @Deprecated
+        public boolean tortuosity = true;
+        /** The boolean flag for computing largest inscribed disc.*/
+        @Deprecated
+        public boolean maxInscribedDisc = true;
+        /** The boolean flag for computing average thickness.*/
+        @Deprecated
+        public boolean averageThickness = true;
+        /** The boolean flag for computing geodesic elongation.*/
+        @Deprecated
+        public boolean geodesicElongation = true;
         
-    private static final void addColumnToTable(ResultsTable table, String colName, double[] values)
-    {
-    	for (int i = 0; i < values.length; i++)
-    	{
-    		table.setValue(colName, i, values[i]);
-    	}
-    }
-
-    private static final void addColumnToTable(ResultsTable table, String colName, int[] values)
-    {
-    	for (int i = 0; i < values.length; i++)
-    	{
-    		table.setValue(colName, i, values[i]);
-    	}
+        /**
+         * Set the state of all features.
+         * 
+         * @param state
+         *            the state to set.
+         */
+        @Deprecated
+        public void setAll(boolean state)
+        {
+            this.pixelCount = state;
+            this.area = state;
+            this.perimeter = state;
+            this.circularity = state;
+            this.eulerNumber = state;
+            this.boundingBox = state;
+            this.centroid = state;
+            this.equivalentEllipse = state;
+            this.ellipseElongation = state;
+            this.convexity = state;
+            this.maxFeretDiameter = state;
+            this.orientedBox = state;
+            this.orientedBoxElongation = state;
+            this.geodesicDiameter = state;
+            this.tortuosity = state;
+            this.maxInscribedDisc = state;
+            this.averageThickness = state;
+            this.geodesicElongation = state;
+        }
     }
 }

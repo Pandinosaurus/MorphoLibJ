@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -52,7 +52,7 @@ import inra.ijpb.label.LabelValues;
  * @see inra.ijpb.binary.distmap.DistanceTransform5x5Float
  * @see inra.ijpb.binary.distmap.DistanceTransform
  * 
- * @deprecated replaced by ChamferDistanceTransform2DShort (since 1.4.4)
+ * @deprecated replaced by ChamferDistanceTransform2DShort (since 1.5.0)
  * 
  * @author David Legland
  */
@@ -81,6 +81,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	/**
 	 * Default constructor with predefined chamfer weights.
 	 */
+	@Deprecated
 	public DistanceTransform5x5Short() 
 	{
 		this(new short[]{5, 7, 11}, true);
@@ -93,6 +94,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	 * @param weights
 	 *            a set of chamfer weights with at least three values
 	 */
+	@Deprecated
 	public DistanceTransform5x5Short(ChamferWeights weights)
 	{
 		this(weights.getShortWeights(), true);
@@ -102,6 +104,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	 * Default constructor that specifies the chamfer weights.
 	 * @param weights an array of two weights for orthogonal and diagonal directions
 	 */
+	@Deprecated
 	public DistanceTransform5x5Short(short[] weights) 
 	{
 		this(weights, true);
@@ -117,6 +120,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform5x5Short(ChamferWeights weights, boolean normalize)
 	{
 		this(weights.getShortWeights(), normalize);
@@ -130,6 +134,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	 *            flag indicating whether the final distance map should be
 	 *            normalized by the first weight
 	 */
+	@Deprecated
 	public DistanceTransform5x5Short(short[] weights, boolean normalize)
 	{
 		if (weights.length < 3) 
@@ -161,6 +166,7 @@ public class DistanceTransform5x5Short extends AlgoStub implements DistanceTrans
 	 *         pixel otherwise</li>
 	 *         </ul>
 	 */
+	@Deprecated
 	public ShortProcessor distanceMap(ImageProcessor labelImage) 
 	{
 		ShortProcessor distMap = initializeResult(labelImage);

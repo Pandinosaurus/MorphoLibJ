@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -30,6 +30,7 @@ import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.distmap.ChamferMask2D;
+import inra.ijpb.data.image.ImageUtils;
 
 public class GeodesicDistanceTransformShortTest
 {
@@ -182,4 +183,83 @@ public class GeodesicDistanceTransformShortTest
 		assertEquals(251, map.get(190, 210));
 	}
 
+
+    @Test
+    public void testGeodesicDistanceMap_Labels_Borgefors()
+    {
+        ImageProcessor labels = new ByteProcessor(12, 12);
+        for (int y = 0; y < 5; y++)
+        {
+            for (int x = 0; x < 5; x++)
+            {
+                labels.set(x + 1, y + 1, 3);
+                labels.set(x + 6, y + 1, 4);
+                labels.set(x + 1, y + 6, 5);
+                labels.set(x + 6, y + 6, 6);
+            }
+        }
+        ImageProcessor markers = new ByteProcessor(12, 12);
+        markers.set(1, 1, 255);
+        markers.set(6, 1, 255);
+        markers.set(1, 6, 255);
+        markers.set(6, 6, 255);
+
+        // Compute map
+        GeodesicDistanceTransform algo = new GeodesicDistanceTransformShort(ChamferMask2D.BORGEFORS, true);
+        ImageProcessor map = algo.geodesicDistanceMap(markers, labels);
+
+        // expect 0.0 at marker position
+        assertEquals(0, map.get(1, 1));
+        assertEquals(0, map.get(6, 1));
+        assertEquals(0, map.get(1, 6));
+        assertEquals(0, map.get(6, 6));
+        // expect 4*4/3 ~= 5.33 at square corners
+        assertEquals(5, map.get(5, 5));
+        assertEquals(5, map.get(10, 5));
+        assertEquals(5, map.get(5, 10));
+        assertEquals(5, map.get(10, 10));
+        // expect 0 in background
+        assertEquals(0, map.get(0, 0));
+        assertEquals(0, map.get(11, 0));
+        assertEquals(0, map.get(0, 11));
+        assertEquals(0, map.get(11, 11));
+    }
+    
+    @Test
+    public void testGeodesicDistanceMap_ComplexLabels_Borgefors()
+    {
+        ImageProcessor labelMap = ImageUtils.createByteProcessor(new int[][] {
+            {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5},
+            {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5},
+            {3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 5, 5},
+            {3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 5, 5},
+            {3, 3, 4, 4, 5, 5, 4, 4, 3, 3, 4, 4, 5, 5},
+            {3, 3, 4, 4, 5, 5, 4, 4, 3, 3, 4, 4, 5, 5},
+            {3, 3, 4, 4, 5, 5, 4, 4, 4, 4, 4, 4, 5, 5},
+            {3, 3, 4, 4, 5, 5, 4, 4, 4, 4, 4, 4, 5, 5},
+            {3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+            {3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        });
+//        ImageUtils.print(labelMap);
+
+        // choose three markers, one for each region
+        ImageProcessor markers = new ByteProcessor(14, 10);
+        markers.set(0, 9, 255);
+        markers.set(2, 9, 255);
+        markers.set(13, 0, 255);
+
+        // Compute map
+        GeodesicDistanceTransform algo = new GeodesicDistanceTransformShort(ChamferMask2D.BORGEFORS, true);
+        ImageProcessor distMap = algo.geodesicDistanceMap(markers, labelMap);
+//        ImageUtils.print(distMap);
+
+        // expect 0.0 at marker position
+        assertEquals(0, distMap.get(0, 9));
+        assertEquals(0, distMap.get(2, 9));
+        assertEquals(0, distMap.get(13, 0));
+        // expect 4*4/3 ~= 5.33 at square corners
+        assertEquals(55/3, distMap.get(9, 5));
+        assertEquals(58/3, distMap.get(11, 0));
+        assertEquals(55/3, distMap.get(4, 4));
+    }
 }

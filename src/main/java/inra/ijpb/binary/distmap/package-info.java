@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -28,14 +28,14 @@
  * 
  * <p>
  * Example of use:
- * <pre><code>
- *	ChamferWeights weights = ChamferWeights.CHESSKNIGHT;
+ * <pre>{@code
+ *	ChamferMask3D mask = ChamferMask3D.CHESSKNIGHT;
  *	boolean normalize = true;
- *	DistanceTransform dt = new DistanceTransform5x5Short(weights, normalize);
+ *	DistanceTransform dt = new ChamferDistanceTransform2DShort(mask, normalize);
  *	ImageProcessor result = dt.distanceMap(inputImage);
  *	// or:
- *	ImagePlus resultPlus = BinaryImages.distanceMap(imagePlus, weights.getShortWeights(), normalize);
- * </code></pre>
+ *	ImagePlus resultPlus = BinaryImages.distanceMap(imagePlus, mask, false, normalize);
+ * }</pre>
  * 
  * @see inra.ijpb.binary.BinaryImages#distanceMap(ImageProcessor, short[], boolean)
  * @see inra.ijpb.binary.BinaryImages#distanceMap(ImageProcessor, float[], boolean)

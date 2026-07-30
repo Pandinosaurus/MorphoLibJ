@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -30,7 +30,21 @@ package inra.ijpb.algo;
  */
 public interface AlgoListener
 {
+	/**
+	 * The method devoted to manage the change in the progression of the
+	 * algorithm.
+	 * 
+	 * @param evt
+	 *            the AlgoEvent instance containing info about the algorithm.
+	 */
 	public void algoProgressChanged(AlgoEvent evt);
 
+	/**
+	 * The method devoted to manage the change in the status of the
+	 * algorithm.
+	 * 
+	 * @param evt
+	 *            the AlgoEvent instance containing info about the algorithm.
+	 */
 	public void algoStatusChanged(AlgoEvent evt);
 }

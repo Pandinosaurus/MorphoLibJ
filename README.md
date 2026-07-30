@@ -1,10 +1,11 @@
-[![](https://travis-ci.org/ijpb/MorphoLibJ.svg?branch=master)](https://travis-ci.org/ijpb/MorphoLibJ)
+[![](https://github.com/ijpb/MorphoLibJ/actions/workflows/build-main.yml/badge.svg)](https://github.com/ijpb/MorphoLibJ/actions/workflows/build-main.yml)
 [![DOI](https://zenodo.org/badge/21349/ijpb/MorphoLibJ.svg)](https://zenodo.org/badge/latestdoi/21349/ijpb/MorphoLibJ)
 
-MorphoLibJ
+![MorphoLibJ logo](doc/logo/logo-64x64.png) MorphoLibJ
 ============
 
-Collection of mathematical morphology methods and plugins for [ImageJ](http://imagej.net/Welcome), created at the [INRA-IJPB Modeling and Digital Imaging lab](http://www-ijpb.versailles.inra.fr/en/bc/equipes/modelisation-imagerie/).
+MorphoLibJ is a collection of mathematical morphology methods and plugins for [ImageJ](http://imagej.net/Welcome), 
+created at the [INRA-IJPB Modeling and Digital Imaging lab](http://www-ijpb.versailles.inra.fr/en/bc/equipes/modelisation-imagerie/).
 
 The library implements several functionalities that were missing in the ImageJ software, and that were not or only partially covered by other plugins. Namely:
 
@@ -32,18 +33,41 @@ Installation
 
 > 4. Click _Apply changes_ and restart Fiji.
 
+
+Develop upon MorphoLibJ
+------------
+
+If you develop plugins / applications based on MorphoLibJ, you can use add the following dependency in the maven project configuration file:
+```
+  <dependency>
+    <groupId>fr.inra.ijpb</groupId>
+    <artifactId>MorphoLibJ_</artifactId>
+    <version>1.6.5</version>
+  </dependency>
+```
+
+In case the last version of MorphoLibJ is not included in the maven repository,
+one workaround is to download the jar file of the last version, 
+and to add it to the local maven repository. 
+The following command may help (adapt version number as necessary):
+```
+mvn install:install-file -Dfile=MorphoLibJ_-1.6.5.jar -DgroupId=fr.inra.ijpb -DartifactId=MorphoLibJ_ -Dversion=1.6.5 -Dpackaging=jar -DgeneratePom=true
+```
+
 Documentation
 -------------
 
 A more detailed presentation of the library and its plugins is available on the [ImageJ/Fiji Wiki](http://imagej.net/MorphoLibJ).
+We have as well a [User Manual](https://github.com/ijpb/MorphoLibJ/releases/download/MorphoLibJ_-1.6.5/MorphoLibJ-manual-v1.6.5.pdf) in pdf format.
 
-We have as well a [User Manual](https://github.com/ijpb/MorphoLibJ/releases/download/v1.4.2/MorphoLibJ-manual-v1.4.2.pdf) in pdf format.
+The library have been presented during several meetings. In particular, it was presented during a [NeuBIAS NEUBIASAcademy@Home webinar](https://www.youtube.com/watch?v=_SiM33C3KcE) in 2020 ([slides are available](https://f1000research.com/slides/9-1378) as well).
 
-The main source code directory is [src/main/java/inra/ijpb](http://github.com/ijpb/MorphoLibJ/tree/master/src/main/java/inra/ijpb).
-
-You can browse the [javadoc](http://ijpb.github.io/MorphoLibJ/javadoc/) for more information about its API.
+The main source code directory is [src/main/java/inra/ijpb](http://github.com/ijpb/MorphoLibJ/tree/master/src/main/java/inra/ijpb). 
+You can browse the [javadoc](https://ijpb.github.io/MorphoLibJ/javadoc/index.html) for more information about its API.
 
 Citation
 --------
 Please note that MorphoLibJ is based on a publication. If you use it successfully for your research please be so kind to cite our work:
 * David Legland, Ignacio Arganda-Carreras, Philippe Andrey; [MorphoLibJ: integrated library and plugins for mathematical morphology with ImageJ](http://bioinformatics.oxfordjournals.org/content/early/2016/07/19/bioinformatics.btw413). Bioinformatics 2016; 32 (22): 3532-3534. doi: 10.1093/bioinformatics/btw413
+
+The [MorphoLibJ logo](doc/logo) is available as PNG file in various formats.

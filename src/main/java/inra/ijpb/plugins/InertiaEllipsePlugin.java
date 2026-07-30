@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -62,6 +62,7 @@ public class InertiaEllipsePlugin implements PlugIn
 	/* (non-Javadoc)
      * @see ij.plugin.PlugIn#run(java.lang.String)
      */
+	@Deprecated
 	public void run(String args)
 	{
 		// Open a dialog to choose:

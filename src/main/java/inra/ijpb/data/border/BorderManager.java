@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -61,11 +61,17 @@ public interface BorderManager {
 	 *
 	 */
 	public enum Type {
+		/** replicates nearest pixel to populate border */
 		REPLICATED("Replicate"), 
+		/** uses periodic boundary to populate border */
 		PERIODIC("Periodic"), 
+		/** uses mirrored image to populate border */
 		MIRRORED("Mirrored"), 
+		/** uses black value (0) to fill border */
 		BLACK("Black"), 
+		/** uses white value (0) to fill border */
 		WHITE("White"), 
+		/** uses gray value (0) to fill border */
 		GRAY("Gray");
 		
 		private Type(String label) {
@@ -78,10 +84,20 @@ public interface BorderManager {
 			return this.label;
 		}
 		
+		/**
+		 * @return the label used to identify this border manager
+		 */
 		public String getLabel() {
 			return this.label;
 		}
 		
+		/**
+		 * Creates a new Border Manager for the input image.
+		 * 
+		 * @param image
+		 *            the image to wrap
+		 * @return a new instance of BorderManager
+		 */
 		public BorderManager createBorderManager(ImageProcessor image) {
 			switch((Type) this) {
 			case REPLICATED:
@@ -104,7 +120,10 @@ public interface BorderManager {
 				throw new RuntimeException("Unknown border manager for type "  + this);
 			}
 		}
-	
+		
+		/**
+		 * @return all the labels used for identifying this enumeration.
+		 */
 		public static String[] getAllLabels(){
 			int n = Type.values().length;
 			String[] result = new String[n];
@@ -138,13 +157,56 @@ public interface BorderManager {
 	}
 
 	/**
-	 * Returns the value corresponding to (x,y) position. Position can be
-	 * outside original image bounds.
-	 *   
-	 * @param x column index of the position
-	 * @param y row index of the position
-	 * @return border corrected value
-	 */
+     * Adds the specified number of pixels around the input image, and returns
+     * the resulting image. 
+     * 
+     * @param image
+     *            the input image
+     * @param left
+     *            the number of pixels to add to the left of the image
+     * @param right
+     *            the number of pixels to add to the right of the image
+     * @param top
+     *            the number of pixels to add on top of the image
+     * @param bottom
+     *            the number of pixels to add at the bottom of the image
+     * @return a new image with extended borders
+     */
+    public default ImageProcessor addBorders(ImageProcessor image, 
+            int left, int right, int top, int bottom)
+    {
+        // get image dimensions
+        int width = image.getWidth(); 
+        int height = image.getHeight(); 
+        
+        // compute result dimensions
+        int width2 = width + left + right;
+        int height2 = height + top + bottom;
+        ImageProcessor result = image.createProcessor(width2, height2);
+        
+        // fill result image
+        for (int x = 0; x < width2; x++)
+        {
+            for (int y = 0; y < height2; y++)
+            {
+                result.set(x, y, this.get(x - left, y - top));
+            }
+        }
+        
+        return result;
+    }
+    
+    
+	/**
+     * Returns the value corresponding to (x,y) position. Position can be
+     * outside original image bounds.
+     * 
+     * @param x
+     *            column index of the position
+     * @param y
+     *            row index of the position
+     * @return border corrected value
+     */
 	public int get(int x, int y);
 	
 	/**

@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -40,10 +40,26 @@ public class LinearHorizontalStrel extends AbstractInPlaceStrel  {
 	// ==================================================
 	// Static methods 
 	
+	/**
+	 * Creates a new line-shape structuring element with the specified diameter
+	 * (equal to the length of the line).
+	 * 
+	 * @param diam
+	 *            the length of the line along the X-direction
+	 * @return a new linear structuring element
+	 */
 	public final static LinearHorizontalStrel fromDiameter(int diam) {
 		return new LinearHorizontalStrel(diam);
 	}
 	
+	/**
+	 * Creates a new line-shape structuring element with the specified radius
+	 * (such that orthogonal diameter equals 2*radius+1).
+	 * 
+	 * @param radius
+	 *            the radius of the line, such that line length equals 2*radius+1
+	 * @return a new linear structuring element
+	 */
 	public final static LinearHorizontalStrel fromRadius(int radius) {
 		return new LinearHorizontalStrel(2 * radius + 1, radius);
 	}
@@ -321,7 +337,7 @@ public class LinearHorizontalStrel extends AbstractInPlaceStrel  {
 	 */
 	@Override
 	public int[] getOffset() {
-		return new int[]{this.offset, this.offset};
+		return new int[]{this.offset, 0};
 	}
 
 	/* (non-Javadoc)

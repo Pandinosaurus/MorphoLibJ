@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * Mathematical morphology library and plugins for ImageJ/Fiji.
+ * %%
+ * Copyright (C) 2014 - 2026 INRA.
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
 /**
  * 
  */
@@ -63,7 +84,7 @@ public class Centroid extends RegionAnalyzer2D<Point2D>
 	{
 		// create associative array to know index of each label
 		int nLabels = labels.length;
-        HashMap<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
+		HashMap<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
 
 		// allocate memory for result
 		int[] counts = new int[nLabels];
@@ -94,8 +115,19 @@ public class Centroid extends RegionAnalyzer2D<Point2D>
 		// normalize by number of pixels in each region
 		for (int i = 0; i < nLabels; i++)
 		{
+			if (counts[i] == 0) continue;
+			
 			centroids[i][0] /= counts[i];
 			centroids[i][1] /= counts[i];
+		}
+
+		// add coordinates of origin pixel (IJ coordinate system)
+		for (int i = 0; i < nLabels; i++)
+		{
+			if (counts[i] == 0) continue;
+			
+			centroids[i][0] += 0.5;
+			centroids[i][1] += 0.5;
 		}
 
 		return centroids;
@@ -180,9 +212,9 @@ public class Centroid extends RegionAnalyzer2D<Point2D>
 			ox = calib.xOrigin;
 			oy = calib.yOrigin;
 		}
-		
+
 		// create associative array to know index of each label
-        HashMap<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
+		HashMap<Integer, Integer> labelIndices = LabelImages.mapLabelIndices(labels);
 
 		// allocate memory for result
 		int nLabels = labels.length;
@@ -190,9 +222,9 @@ public class Centroid extends RegionAnalyzer2D<Point2D>
 		double[] cx = new double[nLabels];
 		double[] cy = new double[nLabels];
 
-    	fireStatusChanged(this, "Compute centroids");
+		fireStatusChanged(this, "Compute centroids");
 		// compute centroid of each region
-    	for (int y = 0; y < height; y++) 
+		for (int y = 0; y < height; y++)
 		{
 			for (int x = 0; x < width; x++)
 			{
@@ -206,12 +238,31 @@ public class Centroid extends RegionAnalyzer2D<Point2D>
 				counts[index]++;
 			}
 		}
+		this.fireProgressChanged(this, 1, 1);
 
 		// normalize by number of pixels in each region
-    	Point2D[] points = new Point2D[nLabels];
 		for (int i = 0; i < nLabels; i++)
 		{
-			points[i] = new Point2D.Double(cx[i] / counts[i] + ox, cy[i] / counts[i] + oy);
+			if (counts[i] == 0) continue;
+
+			cx[i] /= counts[i];
+			cy[i] /= counts[i];
+		}
+
+		// add coordinates of origin pixel (IJ coordinate system)
+		for (int i = 0; i < nLabels; i++)
+		{
+			if (counts[i] == 0) continue;
+
+			cx[i] += .5 * sx + ox;
+			cy[i] += .5 * sy + oy;
+		}
+
+		// create array of Point3D
+		Point2D[] points = new Point2D[nLabels];
+		for (int i = 0; i < nLabels; i++)
+		{
+			points[i] = new Point2D.Double(cx[i], cy[i]);
 		}
 
 		return points;

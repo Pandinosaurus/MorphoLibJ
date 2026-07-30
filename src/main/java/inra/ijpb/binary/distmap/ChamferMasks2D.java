@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -76,7 +76,12 @@ public enum ChamferMasks2D
 	 * Use weights 5 for orthogonal neighbors and 7 for diagonal neighbors, and
 	 * 11 for chess-knight moves (best approximation for 5-by-5 masks).
 	 */
-	CHESSKNIGHT("Chessknight (5,7,11)", ChamferMask2D.CHESSKNIGHT);
+	CHESSKNIGHT("Chessknight (5,7,11)", ChamferMask2D.CHESSKNIGHT),
+	/**
+	 * Chamfer mask in the 7-by-7 neighborhood defined using the four weights
+	 * 12, 17, 27, and 38.
+	 */
+	VERWER("Verwer (12,17,27,38)", ChamferMask2D.VERWER);
 
 
 	private final String label;
@@ -88,6 +93,9 @@ public enum ChamferMasks2D
 		this.mask = mask;
 	}
 
+	/**
+	 * @return the chamfer mask associated to this enumeration entry 
+	 */
 	public ChamferMask2D getMask()
 	{
 		return this.mask;
@@ -98,6 +106,9 @@ public enum ChamferMasks2D
 		return this.label;
 	}
 
+	/**
+	 * @return the array of labels for this enumeration
+	 */
 	public static String[] getAllLabels()
 	{
 		int n = ChamferMasks2D.values().length;

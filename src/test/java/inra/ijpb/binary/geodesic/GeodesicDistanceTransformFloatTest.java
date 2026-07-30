@@ -2,7 +2,7 @@
  * #%L
  * Mathematical morphology library and plugins for ImageJ/Fiji.
  * %%
- * Copyright (C) 2014 - 2017 INRA.
+ * Copyright (C) 2014 - 2026 INRA.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -182,6 +182,48 @@ public class GeodesicDistanceTransformFloatTest
 
 		// expect 250.8
 		assertEquals(250.8, map.getf(190, 210), 0.01);
+	}
+
+	@Test
+	public void testGeodesicDistanceMap_Labels_Borgefors()
+	{
+		ImageProcessor labels = new ByteProcessor(12, 12);
+		for (int y = 0; y < 5; y++)
+		{
+			for (int x = 0; x < 5; x++)
+			{
+				labels.set(x + 1, y + 1, 3);
+				labels.set(x + 6, y + 1, 4);
+				labels.set(x + 1, y + 6, 5);
+				labels.set(x + 6, y + 6, 6);
+			}
+		}
+		ImageProcessor markers = new ByteProcessor(12, 12);
+		markers.set(1, 1, 255);
+		markers.set(6, 1, 255);
+		markers.set(1, 6, 255);
+		markers.set(6, 6, 255);
+		
+		// Compute map
+		GeodesicDistanceTransform algo = new GeodesicDistanceTransformFloat(
+				ChamferMask2D.BORGEFORS, true);
+		ImageProcessor map = algo.geodesicDistanceMap(markers, labels);
+
+		// expect 0.0 at marker position
+		assertEquals(0.0, map.getf(1, 1), 0.01);
+		assertEquals(0.0, map.getf(6, 1), 0.01);
+		assertEquals(0.0, map.getf(1, 6), 0.01);
+		assertEquals(0.0, map.getf(6, 6), 0.01);
+		// expect 4*4/3 ~= 5.33 at square corners
+		assertEquals(5.33, map.getf( 5,  5), 0.01);
+		assertEquals(5.33, map.getf(10,  5), 0.01);
+		assertEquals(5.33, map.getf( 5, 10), 0.01);
+		assertEquals(5.33, map.getf(10, 10), 0.01);
+		// expect NaN in background
+		assertTrue(Float.isNaN(map.getf( 0,  0)));
+		assertTrue(Float.isNaN(map.getf(11,  0)));
+		assertTrue(Float.isNaN(map.getf( 0, 11)));
+		assertTrue(Float.isNaN(map.getf(11, 11)));
 	}
 
 }
